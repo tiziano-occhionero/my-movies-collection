@@ -1,0 +1,50 @@
+<nav class="navbar navbar-expand-lg bg-dark navbar-dark sticky-top">
+  <div class="container-fluid">
+    <!-- Logo e titolo -->
+    <a class="navbar-brand" routerLink="/">MyMoviesCollection</a>
+
+    <!-- Navigazione tra pagine -->
+    <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+      <li class="nav-item">
+        <a class="nav-link" routerLink="/inserimento" routerLinkActive="active">Inserimento</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" routerLink="/cerca" routerLinkActive="active">Cerca</a>
+      </li>
+    </ul>
+
+    <!-- Contenuto variabile in base alla pagina -->
+    <div *ngIf="isInserimentoPage()" class="d-flex">
+      <input class="form-control me-2" type="text" placeholder="Cerca su TMDB">
+      <button class="btn btn-outline-light">Cerca</button>
+    </div>
+
+    <div *ngIf="isCercaPage()" class="d-flex align-items-center">
+      <input class="form-control me-2" type="text" placeholder="Cerca nella collezione">
+      <button class="btn btn-outline-light me-2">Cerca</button>
+
+      <!-- Dropdown vista -->
+      <div class="dropdown me-2">
+        <button class="btn btn-outline-light dropdown-toggle" type="button" data-bs-toggle="dropdown">
+          Vista
+        </button>
+        <ul class="dropdown-menu dropdown-menu-end">
+          <li><a class="dropdown-item" href="#">Galleria</a></li>
+          <li><a class="dropdown-item" href="#">Elenco</a></li>
+        </ul>
+      </div>
+
+      <!-- Dropdown ordinamento -->
+      <div class="dropdown">
+        <button class="btn btn-outline-light dropdown-toggle" type="button" data-bs-toggle="dropdown">
+          Ordina
+        </button>
+        <ul class="dropdown-menu dropdown-menu-end">
+          <li><a class="dropdown-item" href="#">Alfabetico (A-Z)</a></li>
+          <li><a class="dropdown-item" href="#">Anno crescente</a></li>
+          <li><a class="dropdown-item" href="#">Anno decrescente</a></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</nav>
