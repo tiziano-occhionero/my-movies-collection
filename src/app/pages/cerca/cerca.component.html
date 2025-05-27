@@ -1,1 +1,60 @@
-<p>cerca works!</p>
+<div class="container mt-3">
+
+  <h2>Risultati ricerca nella collezione</h2>
+
+  <!-- Barra filtri con dropdown -->
+  <div class="d-flex justify-content-start mb-3">
+
+    <!-- Dropdown Vista -->
+    <div class="dropdown me-3">
+      <button class="btn btn-outline-primary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+        Vista
+      </button>
+      <ul class="dropdown-menu">
+        <li><a class="dropdown-item" href="#" (click)="setVista('galleria')">Galleria</a></li>
+        <li><a class="dropdown-item" href="#" (click)="setVista('elenco')">Elenco</a></li>
+      </ul>
+    </div>
+
+    <!-- Dropdown Ordina -->
+    <div class="dropdown">
+      <button class="btn btn-outline-primary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+        Ordina
+      </button>
+      <ul class="dropdown-menu">
+        <li><a class="dropdown-item" href="#" (click)="setOrdina('alfabetico')">Alfabetico (A-Z)</a></li>
+        <li><a class="dropdown-item" href="#" (click)="setOrdina('anno-crescente')">Anno crescente</a></li>
+        <li><a class="dropdown-item" href="#" (click)="setOrdina('anno-decrescente')">Anno decrescente</a></li>
+      </ul>
+    </div>
+
+  </div>
+
+  <!-- Qui vanno i risultati -->
+  <div *ngIf="film.length === 0" class="alert alert-warning">
+    Nessun film trovato per "{{ query }}".
+  </div>
+
+  <div *ngIf="film.length > 0">
+    <!-- Mostra in galleria o elenco a seconda della vista -->
+    <div *ngIf="vista === 'galleria'" class="row">
+      <div *ngFor="let f of film" class="col-md-3 mb-3">
+        <div class="card">
+          <img [src]="'https://image.tmdb.org/t/p/w300' + f.poster_path" class="card-img-top" *ngIf="f.poster_path" />
+          <div class="card-body">
+            <h5 class="card-title">{{ f.title }}</h5>
+            <p class="card-text">{{ f.release_date | date:'yyyy' }}</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div *ngIf="vista === 'elenco'">
+      <ul class="list-group">
+        <li *ngFor="let f of film" class="list-group-item">
+          {{ f.title }} ({{ f.release_date | date:'yyyy' }})
+        </li>
+      </ul>
+    </div>
+  </div>
+</div>

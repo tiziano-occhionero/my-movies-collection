@@ -5,11 +5,10 @@ import { BehaviorSubject } from 'rxjs';
   providedIn: 'root'
 })
 export class FilmService {
-
-  constructor() { }
-
   private querySubject = new BehaviorSubject<string>('');
   query$ = this.querySubject.asObservable();
+
+  constructor() {}
 
   setQuery(value: string) {
     this.querySubject.next(value);
@@ -19,11 +18,16 @@ export class FilmService {
     return this.querySubject.value;
   }
 
-  // In futuro: qui aggiungeremo chiamate a TMDB
+  // Simulazione futura per chiamate a TMDB
   cercaFilm() {
     const query = this.getQuery();
     console.log('Cerca film con query:', query);
     // TODO: chiamata HTTP
   }
 
+  // 🔹 Metodo aggiunto per supportare la pagina Cerca
+  getTuttiIFilm(): any[] {
+    const dati = localStorage.getItem('filmLocali');
+    return dati ? JSON.parse(dati) : [];
+  }
 }

@@ -13,38 +13,20 @@
       </li>
     </ul>
 
-    <!-- Contenuto variabile in base alla pagina -->
-    <div *ngIf="isInserimentoPage()" class="d-flex">
-      <input class="form-control me-2" type="text" placeholder="Cerca su TMDB">
-      <button class="btn btn-outline-light">Cerca</button>
-    </div>
+    <form (ngSubmit)="onSubmit()" class="d-flex ms-auto" role="search">
+      <input
+        class="form-control me-2"
+        type="search"
+        placeholder="Cerca film"
+        aria-label="Cerca"
+        [(ngModel)]="query"
+        name="query"
+      />
+      <button class="btn btn-outline-success" type="submit">Cerca</button>
+    </form>
 
-    <div *ngIf="isCercaPage()" class="d-flex align-items-center">
-      <input class="form-control me-2" type="text" placeholder="Cerca nella collezione">
-      <button class="btn btn-outline-light me-2">Cerca</button>
+    
 
-      <!-- Dropdown vista -->
-      <div class="dropdown me-2">
-        <button class="btn btn-outline-light dropdown-toggle" type="button" data-bs-toggle="dropdown">
-          Vista
-        </button>
-        <ul class="dropdown-menu dropdown-menu-end">
-          <li><a class="dropdown-item" href="#">Galleria</a></li>
-          <li><a class="dropdown-item" href="#">Elenco</a></li>
-        </ul>
-      </div>
-
-      <!-- Dropdown ordinamento -->
-      <div class="dropdown">
-        <button class="btn btn-outline-light dropdown-toggle" type="button" data-bs-toggle="dropdown">
-          Ordina
-        </button>
-        <ul class="dropdown-menu dropdown-menu-end">
-          <li><a class="dropdown-item" href="#">Alfabetico (A-Z)</a></li>
-          <li><a class="dropdown-item" href="#">Anno crescente</a></li>
-          <li><a class="dropdown-item" href="#">Anno decrescente</a></li>
-        </ul>
-      </div>
-    </div>
+    
   </div>
 </nav>
