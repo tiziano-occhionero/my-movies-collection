@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RicercaService } from '../../services/ricerca.service';
-import { FilmService } from '../../services/film.service';
+import { CollezioneService } from '../../services/collezione.service';
 
 @Component({
   selector: 'app-cerca',
@@ -18,16 +18,17 @@ export class CercaComponent implements OnInit {
   ordinamento: string = 'alfabetico'; // esempio valore iniziale
 
   constructor(
-    private filmService: FilmService,
+    private collezioneService: CollezioneService,
     private ricercaService: RicercaService
   ) {}
 
   ngOnInit(): void {
-    this.tuttiIFilm = this.filmService.getTuttiIFilm();
+    this.tuttiIFilm = this.collezioneService.getCollezione();
     this.film = [...this.tuttiIFilm];
 
-    this.ricercaService.risultatiApi$.subscribe((risultati: any) => {
-      this.query = risultati.trim().toLowerCase();
+    this.ricercaService.queryLocale$.subscribe((query: string) => {
+    this.query = query.trim().toLowerCase();
+
       this.film = this.tuttiIFilm.filter(film =>
         film.title.toLowerCase().includes(this.query)
       );

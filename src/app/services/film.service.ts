@@ -1,3 +1,5 @@
+// ⚠️ Non in uso attualmente. Potrebbe servire in futuro per logica avanzata di query o chiamate TMDB.
+
 import { Injectable } from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
 

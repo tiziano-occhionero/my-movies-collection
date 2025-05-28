@@ -25,4 +25,9 @@ export class RicercaService {
   setQueryLocale(query: string) {
     this.queryLocaleSource.next(query);
   }
+
+  // ✅ Metodo per leggere la query locale direttamente
+  getQueryLocale(): string {
+    return this.queryLocaleSource.value;
+  }
 }

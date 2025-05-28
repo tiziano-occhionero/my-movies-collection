@@ -8,12 +8,12 @@
 
   <!-- Risultati -->
   <div *ngIf="film.length > 0">
-    <div *ngFor="let film of risultati" class="card mb-3">
+    <div *ngFor="let f of film" class="card mb-3">
       <img [src]="'https://image.tmdb.org/t/p/w500' + f.poster_path" class="card-img-top" *ngIf="f.poster_path" />
       <div class="card-body">
         <h5 class="card-title">{{ f.title }}</h5>
         <p class="card-text">{{ f.overview }}</p>
-        <button class="btn btn-success" (click)="aggiungiAllaCollezione(film)>Aggiungi alla collezione</button>
+        <button class="btn btn-success" (click)="aggiungiAllaCollezione(f)">Aggiungi alla collezione</button>
       </div>
     </div>
   </div>

@@ -21,10 +21,10 @@ export class InserimentoComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-  this.ricercaService.risultatiApi$.subscribe((risultati) => {
-    this.film = risultati;
-    this.ricercaEffettuata = true;
-  });
+    this.ricercaService.risultatiApi$.subscribe((risultati) => {
+      this.film = risultati;
+      this.ricercaEffettuata = risultati.length > 0 || this.ricercaService.getQueryLocale().trim() !== '';
+    });
   }
 
 aggiungiAllaCollezione(film: any): void {
