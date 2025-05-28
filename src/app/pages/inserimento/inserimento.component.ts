@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { RicercaService } from '../../services/ricerca.service';
 import { CommonModule } from '@angular/common';
-
+import { CollezioneService } from '../../services/collezione.service';
 
 
 @Component({
@@ -15,15 +15,21 @@ export class InserimentoComponent implements OnInit {
   film: any[] = [];
   ricercaEffettuata: boolean = false;
 
-  constructor(private ricercaService: RicercaService) {}
+  constructor(
+    private ricercaService: RicercaService,
+    private collezioneService: CollezioneService
+  ) {}
 
   ngOnInit(): void {
   this.ricercaService.risultatiApi$.subscribe((risultati) => {
     this.film = risultati;
+    this.ricercaEffettuata = true;
   });
+  }
 
-  this.ricercaService.ricercaApiEffettuata$.subscribe((effettuata) => {
-    this.ricercaEffettuata = effettuata;
-  });
+aggiungiAllaCollezione(film: any): void {
+  this.collezioneService.aggiungiFilm(film);
+  alert(`"${film.title}" aggiunto alla collezione!`);
 }
+
 }
