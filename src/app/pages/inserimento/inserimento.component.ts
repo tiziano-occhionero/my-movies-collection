@@ -23,13 +23,16 @@ export class InserimentoComponent implements OnInit {
   ngOnInit(): void {
     this.ricercaService.risultatiApi$.subscribe((risultati) => {
       this.film = risultati;
-      this.ricercaEffettuata = risultati.length > 0 || this.ricercaService.getQueryLocale().trim() !== '';
+    });
+
+    this.ricercaService.ricercaApiEffettuata$.subscribe((val) => {
+      this.ricercaEffettuata = val;
     });
   }
 
-aggiungiAllaCollezione(film: any): void {
-  this.collezioneService.aggiungiFilm(film);
-  alert(`"${film.title}" aggiunto alla collezione!`);
-}
+  aggiungiAllaCollezione(film: any): void {
+    this.collezioneService.aggiungiFilm(film);
+    alert(`"${film.title}" aggiunto alla collezione!`);
+  }
 
 }
