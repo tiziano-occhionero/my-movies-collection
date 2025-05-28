@@ -12,7 +12,7 @@ export class TmdbService {
   constructor(private http: HttpClient) {}
 
   cercaFilm(query: string): Observable<any> {
-    const url = `${this.baseUrl}/search/movie?api_key=${this.apiKey}&query=${encodeURIComponent(query)}`;
+    const url = `${this.baseUrl}/search/movie?api_key=${this.apiKey}&query=${encodeURIComponent(query)}&language=it-IT`;
     return this.http.get<any>(url);
   }
 }

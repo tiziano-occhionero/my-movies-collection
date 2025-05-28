@@ -2,7 +2,7 @@
   <h2>Inserimento Film</h2>
 
   <!-- Nessun risultato -->
-  <div *ngIf="ricercaEffettuata && film.length === 0" class="alert alert-warning mt-3">
+  <div *ngIf="film.length === 0 && ricercaEffettuata" class="alert alert-warning mt-3">
     Nessun film trovato.
   </div>
 

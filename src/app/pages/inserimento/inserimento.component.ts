@@ -18,9 +18,12 @@ export class InserimentoComponent implements OnInit {
   constructor(private ricercaService: RicercaService) {}
 
   ngOnInit(): void {
-    this.ricercaService.risultatiApi$.subscribe((risultati) => {
-      this.film = risultati;
-      this.ricercaEffettuata = true;
-    });
-  }
+  this.ricercaService.risultatiApi$.subscribe((risultati) => {
+    this.film = risultati;
+  });
+
+  this.ricercaService.ricercaApiEffettuata$.subscribe((effettuata) => {
+    this.ricercaEffettuata = effettuata;
+  });
+}
 }
