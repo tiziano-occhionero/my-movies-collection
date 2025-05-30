@@ -4,13 +4,13 @@ import { RicercaService } from '../../services/ricerca.service';
 import { CollezioneService } from '../../services/collezione.service';
 
 @Component({
-  selector: 'app-cerca',
-  templateUrl: './cerca.component.html',
-  styleUrls: ['./cerca.component.scss'],
+  selector: 'app-collezione',
+  templateUrl: './collezione.component.html',
+  styleUrls: ['./collezione.component.scss'],
   standalone: true,
   imports: [CommonModule]
 })
-export class CercaComponent implements OnInit {
+export class CollezioneComponent implements OnInit {
   tuttiIFilm: any[] = [];
   film: any[] = [];
   vista: 'galleria' | 'elenco' = 'galleria';  // valore iniziale
