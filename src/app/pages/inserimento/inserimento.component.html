@@ -7,13 +7,51 @@
   </div>
 
   <!-- Risultati -->
-  <div *ngIf="film.length > 0">
-    <div *ngFor="let f of film" class="card mb-3">
-      <img [src]="'https://image.tmdb.org/t/p/w500' + f.poster_path" class="card-img-top" *ngIf="f.poster_path" />
-      <div class="card-body">
-        <h5 class="card-title">{{ f.title }}</h5>
-        <p class="card-text">{{ f.overview }}</p>
-        <button class="btn btn-success" (click)="aggiungiAllaCollezione(f)">Aggiungi alla collezione</button>
+  <div *ngIf="film.length > 0" class="row mt-3" id="accordion-container">
+    <div *ngFor="let film of film" class="col-md-6 col-lg-4 mb-4">
+      <div class="card h-100 shadow-sm position-relative">
+        <img *ngIf="film.poster_path"
+             [src]="'https://image.tmdb.org/t/p/w500' + film.poster_path"
+             class="card-img-top"
+             alt="{{ film.title }}" />
+
+        <div class="card-body d-flex flex-column">
+          <h5 class="card-title">{{ film.title }}</h5>
+          <p class="card-text"><strong>Anno:</strong> {{ film.release_date | date:'yyyy' }}</p>
+
+          <!-- Accordion -->
+          <div class="accordion mb-3">
+            <div class="accordion-item border-0">
+              <h2 class="accordion-header">
+                <button
+                  class="accordion-button collapsed"
+                  type="button"
+                  data-bs-toggle="collapse"
+                  [attr.data-bs-target]="'#collapse-' + film.id"
+                  aria-expanded="false"
+                  [attr.aria-controls]="'collapse-' + film.id"
+                >
+                  Dettagli
+                </button>
+              </h2>
+              <div
+                [id]="'collapse-' + film.id"
+                class="accordion-collapse collapse"
+                data-bs-parent="#accordion-container"
+              >
+                <div class="accordion-body bg-white border rounded shadow p-3 position-absolute start-0 w-100">
+                  <p><strong>Genere:</strong> {{ film.genre_names?.join(', ') || 'N/A' }}</p>
+                  <p><strong>Regista:</strong> {{ film.regista || 'N/A' }}</p>
+                  <p><strong>Attori principali:</strong> {{ film.attori?.join(', ') || 'N/A' }}</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <button class="btn btn-success mt-auto" (click)="aggiungiAllaCollezione(film)">
+            Aggiungi alla collezione
+          </button>
+        </div>
       </div>
     </div>
   </div>
