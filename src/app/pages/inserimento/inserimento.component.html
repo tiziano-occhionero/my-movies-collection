@@ -30,6 +30,7 @@
                   [attr.data-bs-target]="'#collapse-' + film.id"
                   aria-expanded="false"
                   [attr.aria-controls]="'collapse-' + film.id"
+                  (click)="caricaDettagliFilm(film)"
                 >
                   Dettagli
                 </button>
