@@ -2,6 +2,11 @@
 
   <h2>Risultati ricerca nella collezione</h2>
 
+  <div *ngIf="messaggio" class="alert alert-success mt-2">
+    {{ messaggio }}
+  </div>
+
+
   <!-- Barra filtri con dropdown -->
   <div class="d-flex justify-content-start mb-3">
 
@@ -44,6 +49,10 @@
           <div class="card-body">
             <h5 class="card-title">{{ f.title }}</h5>
             <p class="card-text">{{ f.release_date | date:'yyyy' }}</p>
+            <button class="btn btn-danger btn-sm mt-2" (click)="rimuoviDaCollezione(f.id)">
+              Rimuovi
+            </button>
+
           </div>
         </div>
       </div>

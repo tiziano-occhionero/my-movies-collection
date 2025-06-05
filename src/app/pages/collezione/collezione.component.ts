@@ -15,7 +15,9 @@ export class CollezioneComponent implements OnInit {
   film: any[] = [];
   vista: 'galleria' | 'elenco' = 'galleria';  // valore iniziale
   query: string = '';
-  ordinamento: string = 'alfabetico'; // esempio valore iniziale
+  ordinamento: string = 'alfabetico'; // esempio valore 
+  messaggio: string = '';
+
 
   constructor(
     private collezioneService: CollezioneService,
@@ -45,6 +47,25 @@ export class CollezioneComponent implements OnInit {
     this.applicaOrdinamento();
   }
 
+  rimuoviDaCollezione(id: number): void {
+    const conferma = confirm('Sei sicuro di voler rimuovere questo film dalla collezione?');
+    if (!conferma) return;
+
+    this.collezioneService.rimuoviFilm(id);
+    this.tuttiIFilm = this.collezioneService.getCollezione();
+
+    this.film = this.tuttiIFilm.filter(f =>
+      f.title.toLowerCase().includes(this.query)
+    );
+
+    this.applicaOrdinamento();
+
+    this.messaggio = 'Film rimosso dalla collezione.';
+
+    setTimeout(() => this.messaggio = '', 3000); // Sparisce dopo 3 secondi
+  }
+
+
   private applicaOrdinamento(): void {
     switch (this.ordinamento) {
       case 'alfabetico':
@@ -60,4 +81,7 @@ export class CollezioneComponent implements OnInit {
         break;
     }
   }
+
+  
+
 }
