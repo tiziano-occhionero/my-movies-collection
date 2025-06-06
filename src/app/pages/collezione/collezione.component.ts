@@ -13,11 +13,10 @@ import { CollezioneService } from '../../services/collezione.service';
 export class CollezioneComponent implements OnInit {
   tuttiIFilm: any[] = [];
   film: any[] = [];
-  vista: 'galleria' | 'elenco' = 'galleria';  // valore iniziale
+  vista: 'galleria' | 'elenco' = 'galleria';
   query: string = '';
-  ordinamento: string = 'alfabetico'; // esempio valore 
+  ordinamento: string = 'alfabetico';
   messaggio: string = '';
-
 
   constructor(
     private collezioneService: CollezioneService,
@@ -29,7 +28,7 @@ export class CollezioneComponent implements OnInit {
     this.film = [...this.tuttiIFilm];
 
     this.ricercaService.queryLocale$.subscribe((query: string) => {
-    this.query = query.trim().toLowerCase();
+      this.query = query.trim().toLowerCase();
 
       this.film = this.tuttiIFilm.filter(film =>
         film.title.toLowerCase().includes(this.query)
@@ -59,12 +58,10 @@ export class CollezioneComponent implements OnInit {
     );
 
     this.applicaOrdinamento();
-
     this.messaggio = 'Film rimosso dalla collezione.';
 
-    setTimeout(() => this.messaggio = '', 3000); // Sparisce dopo 3 secondi
+    setTimeout(() => this.messaggio = '', 3000);
   }
-
 
   private applicaOrdinamento(): void {
     switch (this.ordinamento) {
@@ -77,11 +74,6 @@ export class CollezioneComponent implements OnInit {
       case 'anno-decrescente':
         this.film.sort((a, b) => (b.release_date || '').localeCompare(a.release_date || ''));
         break;
-      default:
-        break;
     }
   }
-
-  
-
 }

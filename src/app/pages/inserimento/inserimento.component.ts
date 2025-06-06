@@ -3,18 +3,23 @@ import { RicercaService } from '../../services/ricerca.service';
 import { CommonModule } from '@angular/common';
 import { CollezioneService } from '../../services/collezione.service';
 import { TmdbService } from '../../services/tmdb.service';
-
+import { FormsModule } from '@angular/forms';
+import Modal from 'bootstrap/js/dist/modal';
 
 @Component({
   selector: 'app-inserimento',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, FormsModule],
   templateUrl: './inserimento.component.html',
   styleUrls: ['./inserimento.component.scss']
 })
 export class InserimentoComponent implements OnInit {
   film: any[] = [];
   ricercaEffettuata: boolean = false;
+  filmSelezionato: any = null;
+  formatoSelezionato: string = '';
+  custodiaSelezionata: string = '';
+  confermaSuccesso: boolean = false;
 
   constructor(
     private ricercaService: RicercaService,
@@ -32,13 +37,8 @@ export class InserimentoComponent implements OnInit {
     });
   }
 
-  aggiungiAllaCollezione(film: any): void {
-    this.collezioneService.aggiungiFilm(film);
-    alert(`"${film.title}" aggiunto alla collezione!`);
-  }
-
   caricaDettagliFilm(film: any): void {
-    if (film.dettagliCaricati) return; // evita chiamate ripetute
+    if (film.dettagliCaricati) return;
 
     this.tmdbService.getDettagliFilm(film.id).subscribe(dettagli => {
       film.genre_names = dettagli.genres?.map((g: any) => g.name) || [];
@@ -46,7 +46,7 @@ export class InserimentoComponent implements OnInit {
 
     this.tmdbService.getCreditiFilm(film.id).subscribe(crediti => {
       const regista = crediti.crew.find((m: any) => m.job === 'Director');
-      const attoriPrincipali = crediti.cast.slice(0, 3); // primi 3 attori
+      const attoriPrincipali = crediti.cast.slice(0, 3);
 
       film.regista = regista ? regista.name : 'N/A';
       film.attori = attoriPrincipali.map((a: any) => a.name);
@@ -54,5 +54,45 @@ export class InserimentoComponent implements OnInit {
     });
   }
 
+  apriModale(film: any): void {
+    this.filmSelezionato = film;
+    this.formatoSelezionato = '';
+    this.custodiaSelezionata = '';
+    this.confermaSuccesso = false;
 
+    const modalElement = document.getElementById('confermaAggiuntaModal');
+    if (modalElement) {
+      const modal = new Modal(modalElement);
+      modal.show();
+    }
+  }
+
+  confermaAggiunta() {
+    if (!this.filmSelezionato || !this.formatoSelezionato || !this.custodiaSelezionata) {
+      return;
+    }
+
+    const filmSalvato = {
+      ...this.filmSelezionato,
+      formato: this.formatoSelezionato,
+      custodia: this.custodiaSelezionata
+    };
+
+    // ✅ Salvataggio tramite servizio corretto
+    this.collezioneService.aggiungiFilm(filmSalvato);
+    this.confermaSuccesso = true;
+
+    setTimeout(() => {
+      this.confermaSuccesso = false;
+      this.formatoSelezionato = '';
+      this.custodiaSelezionata = '';
+      this.filmSelezionato = null;
+
+      const modalElement = document.getElementById('confermaAggiuntaModal');
+      if (modalElement) {
+        const modal = Modal.getInstance(modalElement);
+        modal?.hide();
+      }
+    }, 2000);
+  }
 }
