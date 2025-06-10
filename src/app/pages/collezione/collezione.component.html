@@ -49,6 +49,9 @@
           <div class="card-body">
             <h5 class="card-title">{{ f.title }}</h5>
             <p class="card-text">{{ f.release_date | date:'yyyy' }}</p>
+            <p><strong>Formato:</strong> {{ f.formato }}</p>
+            <p><strong>Custodia:</strong> {{ f.custodia }}</p>
+
             <button class="btn btn-danger btn-sm mt-2" (click)="rimuoviDaCollezione(f.id)">
               Rimuovi
             </button>
@@ -61,7 +64,8 @@
     <div *ngIf="vista === 'elenco'">
       <ul class="list-group">
         <li *ngFor="let f of film" class="list-group-item">
-          {{ f.title }} ({{ f.release_date | date:'yyyy' }})
+          {{ f.title }} ({{ f.release_date | date:'yyyy' }}) - {{ f.formato }} - {{ f.custodia }}
+		  <button class="btn btn-danger btn-sm " (click)="rimuoviDaCollezione(f.id)">Rimuovi</button>
         </li>
       </ul>
     </div>
