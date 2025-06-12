@@ -100,6 +100,12 @@
             (click)="confermaAggiunta()">
             Conferma
           </button>
+          <button
+            class="btn btn-outline-secondary flex-fill"
+            [disabled]="!formatoSelezionato || !custodiaSelezionata || confermaSuccesso"
+            (click)="aggiungiAllaListaDesideri()">
+            Aggiungi alla lista desideri
+          </button>
         </div>
 
       </div>

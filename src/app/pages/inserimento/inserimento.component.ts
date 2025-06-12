@@ -95,4 +95,36 @@ export class InserimentoComponent implements OnInit {
       }
     }, 2000);
   }
+
+  aggiungiAllaListaDesideri(): void {
+    if (!this.filmSelezionato || !this.formatoSelezionato || !this.custodiaSelezionata) return;
+
+    const filmDaSalvare = {
+      ...this.filmSelezionato,
+      formato: this.formatoSelezionato,
+      custodia: this.custodiaSelezionata
+    };
+
+    const lista = JSON.parse(localStorage.getItem('listaDesideri') || '[]');
+    lista.push(filmDaSalvare);
+    localStorage.setItem('listaDesideri', JSON.stringify(lista));
+
+    this.confermaSuccesso = true;
+
+    setTimeout(() => {
+      this.confermaSuccesso = false;
+      this.formatoSelezionato = '';
+      this.custodiaSelezionata = '';
+      this.filmSelezionato = null;
+
+      const modalElement = document.getElementById('confermaAggiuntaModal');
+      if (modalElement) {
+        const modal = Modal.getInstance(modalElement);
+        modal?.hide();
+      }
+    }, 2000);
+  }
+
+
+
 }
