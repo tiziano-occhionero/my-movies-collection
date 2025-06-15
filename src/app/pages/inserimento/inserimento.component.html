@@ -70,9 +70,11 @@
             <label for="formato" class="form-label">Formato</label>
             <select id="formato" class="form-select" [(ngModel)]="formatoSelezionato">
               <option value="" disabled selected>Seleziona formato</option>
-              <option value="DVD">DVD</option>
-              <option value="Blu-ray">Blu-ray</option>
-              <option value="Altro">Altro</option>
+              <option value="uhdbd">UltraHd Blu-ray</option>
+              <option value="bd">Blu-ray</option>
+              <option value="dvd">DVD</option>
+              <option value="vhs">VHS</option>
+              <option value="altro">Altro</option>
             </select>
           </div>
 
@@ -80,10 +82,13 @@
             <label for="custodia" class="form-label">Tipo di custodia</label>
             <select id="custodia" class="form-select" [(ngModel)]="custodiaSelezionata">
               <option value="" disabled selected>Seleziona custodia</option>
-              <option value="Standard">Standard</option>
-              <option value="Steelbook">Steelbook</option>
-              <option value="Slipcase">Slipcase</option>
-              <option value="Altro">Altro</option>
+              <option value="standard">Standard</option>
+              <option value="steelbook">Steelbook</option>
+              <option value="slipcase">Slipcase</option>
+              <option value="sJewelBox">Super Jewel Box</option>
+              <option value="cofanetto">Cofanetto</option>
+              <option value="snapper">Snapper</option>
+              <option value="altro">Altro</option>
             </select>
           </div>
 
