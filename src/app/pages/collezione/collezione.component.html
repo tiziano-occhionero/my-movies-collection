@@ -6,13 +6,9 @@
     {{ messaggio }}
   </div>
 
-
-  <!-- Barra filtri con dropdown -->
   <div class="d-flex justify-content-start mb-3">
-
-    <!-- Dropdown Vista -->
     <div class="dropdown me-3">
-      <button class="btn btn-outline-primary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+      <button class="btn btn-outline-primary dropdown-toggle" type="button" data-bs-toggle="dropdown">
         Vista
       </button>
       <ul class="dropdown-menu">
@@ -21,9 +17,8 @@
       </ul>
     </div>
 
-    <!-- Dropdown Ordina -->
     <div class="dropdown">
-      <button class="btn btn-outline-primary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+      <button class="btn btn-outline-primary dropdown-toggle" type="button" data-bs-toggle="dropdown">
         Ordina
       </button>
       <ul class="dropdown-menu">
@@ -32,30 +27,23 @@
         <li><a class="dropdown-item" href="#" (click)="setOrdina('anno-decrescente')">Anno decrescente</a></li>
       </ul>
     </div>
-
   </div>
 
-  <!-- Qui vanno i risultati -->
   <div *ngIf="film.length === 0" class="alert alert-warning">
     Nessun film trovato per "{{ query }}".
   </div>
 
   <div *ngIf="film.length > 0">
-    <!-- Mostra in galleria o elenco a seconda della vista -->
     <div *ngIf="vista === 'galleria'" class="row">
       <div *ngFor="let f of film" class="col-md-3 mb-3">
         <div class="card">
-          <img [src]="'https://image.tmdb.org/t/p/w300' + f.poster_path" class="card-img-top" *ngIf="f.poster_path" />
+          <img [src]="'https://image.tmdb.org/t/p/w300' + f.posterPath" class="card-img-top" *ngIf="f.posterPath" />
           <div class="card-body">
-            <h5 class="card-title">{{ f.title }}</h5>
-            <p class="card-text">{{ f.release_date | date:'yyyy' }}</p>
+            <h5 class="card-title">{{ f.titolo }}</h5>
+            <p class="card-text">{{ f.anno| date:'yyyy' }}</p>
             <p><strong>Formato:</strong> {{ f.formato }}</p>
             <p><strong>Custodia:</strong> {{ f.custodia }}</p>
-
-            <button class="btn btn-danger btn-sm mt-2" (click)="rimuoviDaCollezione(f.id)">
-              Rimuovi
-            </button>
-
+            <button class="btn btn-danger btn-sm" (click)="rimuoviDaCollezione(f)" [disabled]="!isOnline">Rimuovi</button>
           </div>
         </div>
       </div>
@@ -64,8 +52,8 @@
     <div *ngIf="vista === 'elenco'">
       <ul class="list-group">
         <li *ngFor="let f of film" class="list-group-item">
-          {{ f.title }} ({{ f.release_date | date:'yyyy' }}) - {{ f.formato }} - {{ f.custodia }}
-		  <button class="btn btn-danger btn-sm " (click)="rimuoviDaCollezione(f.id)">Rimuovi</button>
+          {{ f.titolo }} ({{ f.anno| date:'yyyy' }}) - {{ f.formato }} - {{ f.custodia }}
+          <button class="btn btn-danger btn-sm ms-2" (click)="rimuoviDaCollezione(f)" [disabled]="!isOnline">Rimuovi</button>
         </li>
       </ul>
     </div>

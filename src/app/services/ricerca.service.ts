@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, Observable } from 'rxjs';
 
 @Injectable({
   providedIn: 'root'
@@ -16,6 +16,10 @@ export class RicercaService {
   // Per la ricerca locale (pagina cerca)
   private queryLocaleSource = new BehaviorSubject<string>('');
   queryLocale$ = this.queryLocaleSource.asObservable();
+
+  private querySubject = new BehaviorSubject<string>('');
+  query$: Observable<string> = this.querySubject.asObservable();
+
 
   setRisultatiApi(risultati: any[]) {
     this.risultatiApiSource.next(risultati);

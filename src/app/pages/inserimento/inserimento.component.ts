@@ -4,7 +4,9 @@ import { CommonModule } from '@angular/common';
 import { CollezioneService } from '../../services/collezione.service';
 import { TmdbService } from '../../services/tmdb.service';
 import { FormsModule } from '@angular/forms';
+import { Film } from '../../models/film.model';
 import Modal from 'bootstrap/js/dist/modal';
+import { ListaDesideriService } from '../../services/lista-desideri.service';
 
 @Component({
   selector: 'app-inserimento',
@@ -13,19 +15,22 @@ import Modal from 'bootstrap/js/dist/modal';
   templateUrl: './inserimento.component.html',
   styleUrls: ['./inserimento.component.scss']
 })
+
 export class InserimentoComponent implements OnInit {
   film: any[] = [];
   ricercaEffettuata: boolean = false;
   filmSelezionato: any = null;
-  formatoSelezionato: string = '';
-  custodiaSelezionata: string = '';
+  formatoSelezionato: Film['formato'] | '' = '';
+  custodiaSelezionata: Film['custodia'] | '' = '';
+
   confermaSuccesso: boolean = false;
 
   constructor(
     private ricercaService: RicercaService,
     private collezioneService: CollezioneService,
-    private tmdbService: TmdbService
-  ) {}
+    private tmdbService: TmdbService,
+    private listaDesideriService: ListaDesideriService
+  ) { }
 
   ngOnInit(): void {
     this.ricercaService.risultatiApi$.subscribe((risultati) => {
@@ -67,21 +72,7 @@ export class InserimentoComponent implements OnInit {
     }
   }
 
-  confermaAggiunta() {
-    if (!this.filmSelezionato || !this.formatoSelezionato || !this.custodiaSelezionata) {
-      return;
-    }
-
-    const filmSalvato = {
-      ...this.filmSelezionato,
-      formato: this.formatoSelezionato,
-      custodia: this.custodiaSelezionata
-    };
-
-    // ✅ Salvataggio tramite servizio corretto
-    this.collezioneService.aggiungiFilm(filmSalvato);
-    this.confermaSuccesso = true;
-
+  private resetForm(): void {
     setTimeout(() => {
       this.confermaSuccesso = false;
       this.formatoSelezionato = '';
@@ -94,37 +85,68 @@ export class InserimentoComponent implements OnInit {
         modal?.hide();
       }
     }, 2000);
+  }
+
+  confermaAggiunta(): void {
+    if (!this.filmSelezionato || !this.formatoSelezionato || !this.custodiaSelezionata) return;
+
+    const filmSalvato: Film = {
+      id: `${this.filmSelezionato.id}_${this.formatoSelezionato}_${this.custodiaSelezionata}`,
+      tmdbId: this.filmSelezionato.id,
+      titolo: this.filmSelezionato.title,
+      anno: new Date(this.filmSelezionato.release_date).getFullYear(),
+      posterPath: this.filmSelezionato.poster_path,
+      formato: this.formatoSelezionato,
+      custodia: this.custodiaSelezionata,
+      provenienza: 'collezione'
+    };
+
+
+    this.collezioneService.aggiungiFilm(filmSalvato).subscribe({
+      next: () => {
+        this.confermaSuccesso = true;
+        this.resetForm();
+      },
+      error: (err) => {
+        console.error('Errore durante il salvataggio in collezione:', err);
+      }
+    });
   }
 
   aggiungiAllaListaDesideri(): void {
     if (!this.filmSelezionato || !this.formatoSelezionato || !this.custodiaSelezionata) return;
 
-    const filmDaSalvare = {
-      ...this.filmSelezionato,
+    const filmDaSalvare: Film = {
+      id: `${this.filmSelezionato.id}_${this.formatoSelezionato}_${this.custodiaSelezionata}`,
+      tmdbId: this.filmSelezionato.id,
+      titolo: this.filmSelezionato.title,
+      anno: new Date(this.filmSelezionato.release_date).getFullYear(),
+      posterPath: this.filmSelezionato.poster_path,
       formato: this.formatoSelezionato,
-      custodia: this.custodiaSelezionata
+      custodia: this.custodiaSelezionata,
+      provenienza: 'lista-desideri'
     };
 
-    const lista = JSON.parse(localStorage.getItem('listaDesideri') || '[]');
-    lista.push(filmDaSalvare);
-    localStorage.setItem('listaDesideri', JSON.stringify(lista));
+    this.listaDesideriService.aggiungiFilm(filmDaSalvare).subscribe({
+      next: () => {
+        this.confermaSuccesso = true;
 
-    this.confermaSuccesso = true;
+        setTimeout(() => {
+          this.confermaSuccesso = false;
+          this.formatoSelezionato = '';
+          this.custodiaSelezionata = '';
+          this.filmSelezionato = null;
 
-    setTimeout(() => {
-      this.confermaSuccesso = false;
-      this.formatoSelezionato = '';
-      this.custodiaSelezionata = '';
-      this.filmSelezionato = null;
-
-      const modalElement = document.getElementById('confermaAggiuntaModal');
-      if (modalElement) {
-        const modal = Modal.getInstance(modalElement);
-        modal?.hide();
+          const modalElement = document.getElementById('confermaAggiuntaModal');
+          if (modalElement) {
+            const modal = Modal.getInstance(modalElement);
+            modal?.hide();
+          }
+        }, 2000);
+      },
+      error: (err) => {
+        console.error('Errore durante il salvataggio su backend:', err);
       }
-    }, 2000);
+    });
   }
-
-
-
 }
