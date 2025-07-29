@@ -19,6 +19,10 @@ export class CollezioneService {
     private http: HttpClient,
   ) { }
 
+  getTuttiIFilm(): Observable<Film[]> {
+    return this.http.get<Film[]>(this.apiUrl);
+  }
+
   getCollezione(): Film[] {
     const dati = localStorage.getItem(this.storageKey);
     this.collezione = dati ? JSON.parse(dati) : [];

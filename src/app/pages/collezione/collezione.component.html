@@ -40,7 +40,7 @@
           <img [src]="'https://image.tmdb.org/t/p/w300' + f.posterPath" class="card-img-top" *ngIf="f.posterPath" />
           <div class="card-body">
             <h5 class="card-title">{{ f.titolo }}</h5>
-            <p class="card-text">{{ f.anno| date:'yyyy' }}</p>
+            <p class="card-text">{{ f.anno }}</p>
             <p><strong>Formato:</strong> {{ f.formato }}</p>
             <p><strong>Custodia:</strong> {{ f.custodia }}</p>
             <button class="btn btn-danger btn-sm" (click)="rimuoviDaCollezione(f)" [disabled]="!isOnline">Rimuovi</button>
@@ -52,7 +52,7 @@
     <div *ngIf="vista === 'elenco'">
       <ul class="list-group">
         <li *ngFor="let f of film" class="list-group-item">
-          {{ f.titolo }} ({{ f.anno| date:'yyyy' }}) - {{ f.formato }} - {{ f.custodia }}
+          {{ f.titolo }} ({{ f.anno }}) - {{ f.formato }} - {{ f.custodia }}
           <button class="btn btn-danger btn-sm ms-2" (click)="rimuoviDaCollezione(f)" [disabled]="!isOnline">Rimuovi</button>
         </li>
       </ul>

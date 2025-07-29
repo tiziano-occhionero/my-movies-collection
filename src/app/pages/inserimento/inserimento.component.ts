@@ -22,7 +22,7 @@ export class InserimentoComponent implements OnInit {
   filmSelezionato: any = null;
   formatoSelezionato: Film['formato'] | '' = '';
   custodiaSelezionata: Film['custodia'] | '' = '';
-
+  filmGiaPresente: boolean = false;
   confermaSuccesso: boolean = false;
 
   constructor(
@@ -90,17 +90,22 @@ export class InserimentoComponent implements OnInit {
   confermaAggiunta(): void {
     if (!this.filmSelezionato || !this.formatoSelezionato || !this.custodiaSelezionata) return;
 
+    const id = `${this.filmSelezionato.id}_${this.formatoSelezionato}_${this.custodiaSelezionata}`;
+
+    const annoEstratto = this.filmSelezionato.release_date
+      ? parseInt(this.filmSelezionato.release_date.substring(0, 4))
+      : 0;
+
     const filmSalvato: Film = {
-      id: `${this.filmSelezionato.id}_${this.formatoSelezionato}_${this.custodiaSelezionata}`,
+      id,
       tmdbId: this.filmSelezionato.id,
       titolo: this.filmSelezionato.title,
-      anno: new Date(this.filmSelezionato.release_date).getFullYear(),
+      anno: annoEstratto,
       posterPath: this.filmSelezionato.poster_path,
-      formato: this.formatoSelezionato,
-      custodia: this.custodiaSelezionata,
+      formato: this.formatoSelezionato as Film['formato'],
+      custodia: this.custodiaSelezionata as Film['custodia'],
       provenienza: 'collezione'
     };
-
 
     this.collezioneService.aggiungiFilm(filmSalvato).subscribe({
       next: () => {
@@ -149,4 +154,8 @@ export class InserimentoComponent implements OnInit {
       }
     });
   }
+
+
+
+
 }
