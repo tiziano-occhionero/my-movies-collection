@@ -87,75 +87,108 @@ export class InserimentoComponent implements OnInit {
     }, 2000);
   }
 
+  mostraMessaggioGiaPresente(): void {
+    this.filmGiaPresente = true;
+
+    // Chiudi il modale con un piccolo delay
+    const modalElement = document.getElementById('confermaAggiuntaModal');
+    if (modalElement) {
+      const modal = Modal.getInstance(modalElement);
+      setTimeout(() => {
+        modal?.hide();
+      }, 2000); // aspetta mezzo secondo prima di chiudere il modale
+    }
+
+    // Lascia visibile il messaggio per 3 secondi
+    setTimeout(() => {
+      this.filmGiaPresente = false;
+    }, 2000);
+  }
+
+
+
   confermaAggiunta(): void {
     if (!this.filmSelezionato || !this.formatoSelezionato || !this.custodiaSelezionata) return;
 
     const id = `${this.filmSelezionato.id}_${this.formatoSelezionato}_${this.custodiaSelezionata}`;
 
-    const annoEstratto = this.filmSelezionato.release_date
-      ? parseInt(this.filmSelezionato.release_date.substring(0, 4))
-      : 0;
+    // Carica entrambi gli elenchi dal backend
+    this.collezioneService.getTuttiIFilm().subscribe(collezione => {
+      this.listaDesideriService.getTuttiIFilm().subscribe(wishlist => {
+        const filmGiaInCollezione = collezione.some(f => f.id === id);
+        const filmGiaInWishlist = wishlist.some(f => f.id === id);
 
-    const filmSalvato: Film = {
-      id,
-      tmdbId: this.filmSelezionato.id,
-      titolo: this.filmSelezionato.title,
-      anno: annoEstratto,
-      posterPath: this.filmSelezionato.poster_path,
-      formato: this.formatoSelezionato as Film['formato'],
-      custodia: this.custodiaSelezionata as Film['custodia'],
-      provenienza: 'collezione'
-    };
+        if (filmGiaInCollezione || filmGiaInWishlist) {
+          this.mostraMessaggioGiaPresente();
+          return;
+        }
 
-    this.collezioneService.aggiungiFilm(filmSalvato).subscribe({
-      next: () => {
-        this.confermaSuccesso = true;
-        this.resetForm();
-      },
-      error: (err) => {
-        console.error('Errore durante il salvataggio in collezione:', err);
-      }
+        const filmSalvato: Film = {
+          id,
+          tmdbId: this.filmSelezionato.id,
+          titolo: this.filmSelezionato.title,
+          anno: this.filmSelezionato.release_date
+            ? new Date(this.filmSelezionato.release_date).getFullYear()
+            : 0,
+          posterPath: this.filmSelezionato.poster_path,
+          formato: this.formatoSelezionato as Film['formato'],
+          custodia: this.custodiaSelezionata as Film['custodia'],
+          provenienza: 'collezione'
+        };
+
+        this.collezioneService.aggiungiFilm(filmSalvato).subscribe({
+          next: () => {
+            this.confermaSuccesso = true;
+            this.resetForm();
+          },
+          error: (err) => {
+            console.error('Errore durante l\'aggiunta alla collezione:', err);
+          }
+        });
+      });
     });
   }
+
 
   aggiungiAllaListaDesideri(): void {
     if (!this.filmSelezionato || !this.formatoSelezionato || !this.custodiaSelezionata) return;
 
-    const filmDaSalvare: Film = {
-      id: `${this.filmSelezionato.id}_${this.formatoSelezionato}_${this.custodiaSelezionata}`,
-      tmdbId: this.filmSelezionato.id,
-      titolo: this.filmSelezionato.title,
-      anno: new Date(this.filmSelezionato.release_date).getFullYear(),
-      posterPath: this.filmSelezionato.poster_path,
-      formato: this.formatoSelezionato,
-      custodia: this.custodiaSelezionata,
-      provenienza: 'lista-desideri'
-    };
+    const id = `${this.filmSelezionato.id}_${this.formatoSelezionato}_${this.custodiaSelezionata}`;
 
-    this.listaDesideriService.aggiungiFilm(filmDaSalvare).subscribe({
-      next: () => {
-        this.confermaSuccesso = true;
+    // Carica entrambi gli elenchi dal backend
+    this.collezioneService.getTuttiIFilm().subscribe(collezione => {
+      this.listaDesideriService.getTuttiIFilm().subscribe(wishlist => {
+        const filmGiaInCollezione = collezione.some(f => f.id === id);
+        const filmGiaInWishlist = wishlist.some(f => f.id === id);
 
-        setTimeout(() => {
-          this.confermaSuccesso = false;
-          this.formatoSelezionato = '';
-          this.custodiaSelezionata = '';
-          this.filmSelezionato = null;
+        if (filmGiaInWishlist || filmGiaInCollezione) {
+          this.mostraMessaggioGiaPresente();
+          return;
+        }
 
-          const modalElement = document.getElementById('confermaAggiuntaModal');
-          if (modalElement) {
-            const modal = Modal.getInstance(modalElement);
-            modal?.hide();
+        const filmDaSalvare: Film = {
+          id,
+          tmdbId: this.filmSelezionato.id,
+          titolo: this.filmSelezionato.title,
+          anno: this.filmSelezionato.release_date
+            ? new Date(this.filmSelezionato.release_date).getFullYear()
+            : 0,
+          posterPath: this.filmSelezionato.poster_path,
+          formato: this.formatoSelezionato as Film['formato'],
+          custodia: this.custodiaSelezionata as Film['custodia'],
+          provenienza: 'lista-desideri'
+        };
+
+        this.listaDesideriService.aggiungiFilm(filmDaSalvare).subscribe({
+          next: () => {
+            this.confermaSuccesso = true;
+            this.resetForm();
+          },
+          error: (err) => {
+            console.error('Errore durante il salvataggio nella lista desideri:', err);
           }
-        }, 2000);
-      },
-      error: (err) => {
-        console.error('Errore durante il salvataggio su backend:', err);
-      }
+        });
+      });
     });
   }
-
-
-
-
 }
