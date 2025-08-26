@@ -39,7 +39,7 @@ export class InserimentoComponent implements OnInit {
     private collezioneService: CollezioneService,
     private tmdbService: TmdbService,
     private listaDesideriService: ListaDesideriService,
-    public auth: AuthService
+    public auth: AuthService,
   ) { }
 
   ngOnInit(): void {
@@ -50,6 +50,35 @@ export class InserimentoComponent implements OnInit {
       this.ricercaEffettuata = val;
     });
   }
+
+  /** Login modal "sicura": chiude eventuali modali bootstrap prima di aprire la login */
+  private openLoginModalSafely(): void {
+    const openModalEl = document.querySelector('.modal.show') as HTMLElement | null;
+    if (openModalEl) {
+      const inst = Modal.getInstance(openModalEl) || new Modal(openModalEl);
+      inst.hide();
+    }
+    setTimeout(() => this.loginModal?.open(), 200);
+  }
+
+  /** Modale "Accesso richiesto" (il piccolo gate prima del form di login) */
+  private openLoginRequired(): void {
+    const el = document.getElementById('loginRequiredModal');
+    if (el) new Modal(el).show();
+  }
+  private closeLoginRequired(): void {
+    const el = document.getElementById('loginRequiredModal');
+    if (!el) return;
+    const inst = Modal.getInstance(el) || new Modal(el);
+    inst.hide();
+  }
+
+  /** chiamata dal bottone "Accedi" nel gate, o dal pulsante Login in testata */
+  procediAlLogin(): void {
+    this.closeLoginRequired();
+    this.openLoginModalSafely();
+  }
+
 
   get username(): string | null { return this.auth.getLoggedUsername(); }
   get loggedIn(): boolean { return this.auth.isLoggedIn(); }
@@ -108,14 +137,15 @@ export class InserimentoComponent implements OnInit {
     this.custodiaSelezionata = '';
     this.confermaSuccesso = false;
     this.filmGiaPresente = false;
-    this.noPermessi = false;
 
-    const modalElement = document.getElementById('confermaAggiuntaModal');
-    if (modalElement) {
-      const modal = new Modal(modalElement);
-      modal.show();
+    if (!this.loggedIn) {
+      this.openLoginRequired(); // mostra il modale “Accesso richiesto”
+      return;
     }
+    const modalElement = document.getElementById('confermaAggiuntaModal');
+    if (modalElement) new Modal(modalElement).show();
   }
+
 
   private resetForm(): void {
     setTimeout(() => {

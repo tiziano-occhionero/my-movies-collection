@@ -3,7 +3,7 @@
     <h2>Inserimento Film</h2>
 
     <!-- Toggle Login/Logout -->
-    <button *ngIf="!loggedIn; else logoutBtn" class="btn btn-outline-primary btn-sm" (click)="apriLogin()">
+    <button *ngIf="!loggedIn; else logoutBtn" class="btn btn-outline-primary btn-sm" (click)="procediAlLogin()">
       Login
     </button>
     <ng-template #logoutBtn>
@@ -12,6 +12,25 @@
         <button class="btn btn-outline-secondary btn-sm" (click)="onLogoutClick()">Logout</button>
       </div>
     </ng-template>
+  </div>
+
+  <!-- Modale: ACCESSO RICHIESTO -->
+  <div class="modal fade" id="loginRequiredModal" tabindex="-1" aria-labelledby="loginRequiredLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 id="loginRequiredLabel" class="modal-title">Accesso richiesto</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Chiudi"></button>
+        </div>
+        <div class="modal-body">
+          Per aggiungere film alla tua collezione devi effettuare l’accesso.
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-outline-secondary" data-bs-dismiss="modal">Annulla</button>
+          <button class="btn btn-primary" (click)="procediAlLogin()">Accedi</button>
+        </div>
+      </div>
+    </div>
   </div>
 
   <!-- Stato ricerca -->
@@ -60,7 +79,7 @@
     </div>
   </div>
 
-  <!-- Modale per confermare aggiunta alla collezione -->
+  <!-- Modale: conferma aggiunta -->
   <div class="modal fade" id="confermaAggiuntaModal" tabindex="-1" aria-labelledby="confermaAggiuntaModalLabel"
     aria-hidden="true">
     <div class="modal-dialog">
@@ -93,11 +112,6 @@
             </select>
           </div>
 
-          <!-- Solo avviso, senza pulsante Accedi -->
-          <div *ngIf="noPermessi" class="alert alert-warning mt-3">
-            Operazione riservata. Effettua il login per continuare.
-          </div>
-
           <div *ngIf="confermaSuccesso" class="alert alert-success mt-3">
             Film aggiunto con successo!
           </div>
@@ -123,6 +137,25 @@
     </div>
   </div>
 
-  <!-- Login Modal (con reference per @ViewChild) -->
+  <!-- Modale: ACCESSO RICHIESTO -->
+  <div class="modal fade" id="loginRequiredModal" tabindex="-1" aria-labelledby="loginRequiredLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 id="loginRequiredLabel" class="modal-title">Accesso richiesto</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Chiudi"></button>
+        </div>
+        <div class="modal-body">
+          Per aggiungere film alla tua collezione devi effettuare l’accesso.
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-outline-secondary" data-bs-dismiss="modal">Annulla</button>
+          <button class="btn btn-primary" (click)="procediAlLogin()">Accedi</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Login Modal -->
   <app-login-modal #loginRef (loggedIn)="onLoggedIn($event)"></app-login-modal>
 </div>
