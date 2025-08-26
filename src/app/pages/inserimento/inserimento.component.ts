@@ -31,7 +31,13 @@ export class InserimentoComponent implements OnInit {
   filmGiaPresente = false;
   confermaSuccesso = false;
 
-  // avviso permessi nel modale
+  // stato salvataggio
+  isSaving = false;
+
+  // azione da riprendere dopo login (se l’utente era sloggato)
+  private pendingAfterLogin: { action: 'openAdd'; film: any } | null = null;
+
+  // (legacy) avviso dentro modale: non più usato per l’apertura
   noPermessi = false;
 
   constructor(
@@ -51,6 +57,9 @@ export class InserimentoComponent implements OnInit {
     });
   }
 
+  get username(): string | null { return this.auth.getLoggedUsername(); }
+  get loggedIn(): boolean { return this.auth.isLoggedIn(); }
+
   /** Login modal "sicura": chiude eventuali modali bootstrap prima di aprire la login */
   private openLoginModalSafely(): void {
     const openModalEl = document.querySelector('.modal.show') as HTMLElement | null;
@@ -61,7 +70,7 @@ export class InserimentoComponent implements OnInit {
     setTimeout(() => this.loginModal?.open(), 200);
   }
 
-  /** Modale "Accesso richiesto" (il piccolo gate prima del form di login) */
+  /** Modale "Accesso richiesto" (gate prima del form di login) */
   private openLoginRequired(): void {
     const el = document.getElementById('loginRequiredModal');
     if (el) new Modal(el).show();
@@ -79,23 +88,15 @@ export class InserimentoComponent implements OnInit {
     this.openLoginModalSafely();
   }
 
-
-  get username(): string | null { return this.auth.getLoggedUsername(); }
-  get loggedIn(): boolean { return this.auth.isLoggedIn(); }
-
   /**
-   * Apre la login modal in modo sicuro:
-   * - chiude prima qualunque Bootstrap modal aperto (es. confermaAggiuntaModal)
-   * - poi apre la login modal, così non c'è nessun focus trap che blocca l'input
+   * Apre la login modal in modo sicuro (fallback se usata altrove)
    */
   apriLogin(): void {
-    // Chiudi eventuale modal Bootstrap aperto
     const openModalEl = document.querySelector('.modal.show') as HTMLElement | null;
     if (openModalEl) {
       const instance = Modal.getInstance(openModalEl) || new Modal(openModalEl);
       instance.hide();
     }
-    // Piccolo delay per permettere a Bootstrap di rimuovere backdrop e classi body
     setTimeout(() => {
       this.loginModal?.open();
     }, 250);
@@ -103,8 +104,18 @@ export class InserimentoComponent implements OnInit {
 
   onLoggedIn(e: { username: string; password: string }) {
     this.auth.login(e.username, e.password);
-    this.noPermessi = false;
-    // nessun retry automatico: l’utente ripete l’azione se vuole
+
+    // chiudi subito il login modal (se il componente espone close(); uso ?.)
+    this.loginModal?.close?.();
+
+    // se avevamo un'azione pendente (apertura del modale di conferma per un film), riprendila
+    if (this.pendingAfterLogin?.action === 'openAdd' && this.pendingAfterLogin.film) {
+      this.filmSelezionato = this.pendingAfterLogin.film;
+      this.pendingAfterLogin = null;
+
+      const m = document.getElementById('confermaAggiuntaModal');
+      if (m) new Modal(m).show();
+    }
   }
 
   onLogoutClick(): void {
@@ -131,6 +142,7 @@ export class InserimentoComponent implements OnInit {
     });
   }
 
+  /** Click su "Aggiungi alla collezione" */
   apriModale(film: any): void {
     this.filmSelezionato = film;
     this.formatoSelezionato = '';
@@ -139,13 +151,15 @@ export class InserimentoComponent implements OnInit {
     this.filmGiaPresente = false;
 
     if (!this.loggedIn) {
-      this.openLoginRequired(); // mostra il modale “Accesso richiesto”
+      // memorizza l’intento e mostra il gate “Accesso richiesto”
+      this.pendingAfterLogin = { action: 'openAdd', film };
+      this.openLoginRequired();
       return;
     }
+
     const modalElement = document.getElementById('confermaAggiuntaModal');
     if (modalElement) new Modal(modalElement).show();
   }
-
 
   private resetForm(): void {
     setTimeout(() => {
@@ -202,8 +216,6 @@ export class InserimentoComponent implements OnInit {
     };
   }
 
-  isSaving = false;
-
   confermaAggiunta(): void {
     if (!this.filmSelezionato || !this.formatoSelezionato || !this.custodiaSelezionata || this.isSaving) return;
     this.isSaving = true;
@@ -216,13 +228,12 @@ export class InserimentoComponent implements OnInit {
         const filmGiaInWishlist = wishlist.some(f => f.id === id);
 
         if (filmGiaInCollezione || filmGiaInWishlist) {
+          this.isSaving = false;
           this.mostraMessaggioGiaPresente();
           return;
         }
 
         const filmSalvato = this.buildFilmCollezione();
-
-        console.log('[INSERIMENTO] provo POST aggiunta in collezione', filmSalvato);
 
         this.collezioneService.aggiungiFilm(filmSalvato).subscribe({
           next: () => {
@@ -233,7 +244,12 @@ export class InserimentoComponent implements OnInit {
           },
           error: (err) => {
             this.isSaving = false;
-            if (err?.status === 401 || err?.status === 403) { this.noPermessi = true; return; }
+            if (err?.status === 401 || err?.status === 403) {
+              // sessione scaduta: riproponi il gate
+              this.pendingAfterLogin = { action: 'openAdd', film: this.filmSelezionato };
+              this.openLoginRequired();
+              return;
+            }
             console.error('Errore durante l\'aggiunta alla collezione:', err);
           }
         });
@@ -266,7 +282,8 @@ export class InserimentoComponent implements OnInit {
           },
           error: (err: HttpErrorResponse) => {
             if (err.status === 401 || err.status === 403) {
-              this.noPermessi = true;
+              this.pendingAfterLogin = { action: 'openAdd', film: this.filmSelezionato };
+              this.openLoginRequired();
               return;
             }
             console.error('Errore durante il salvataggio nella lista desideri:', err);
