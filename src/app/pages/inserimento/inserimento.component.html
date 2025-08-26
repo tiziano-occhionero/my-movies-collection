@@ -1,5 +1,23 @@
 <div class="container">
-  <h2>Inserimento Film</h2>
+  <div class="d-flex align-items-center justify-content-between">
+    <h2>Inserimento Film</h2>
+
+    <!-- Toggle Login/Logout -->
+    <button *ngIf="!loggedIn; else logoutBtn" class="btn btn-outline-primary btn-sm" (click)="apriLogin()">
+      Login
+    </button>
+    <ng-template #logoutBtn>
+      <div class="d-flex align-items-center gap-2">
+        <span class="text-muted small" *ngIf="auth.getLoggedUsername()">({{ auth.getLoggedUsername() }})</span>
+        <button class="btn btn-outline-secondary btn-sm" (click)="onLogoutClick()">Logout</button>
+      </div>
+    </ng-template>
+  </div>
+
+  <!-- Stato ricerca -->
+  <div class="mt-2 small text-muted">
+    Risultati: {{ film.length }}
+  </div>
 
   <!-- Nessun risultato -->
   <div *ngIf="film.length === 0 && ricercaEffettuata" class="alert alert-warning mt-3">
@@ -8,15 +26,15 @@
 
   <!-- Risultati -->
   <div *ngIf="film.length > 0" class="row mt-3" id="accordion-container">
-    <div *ngFor="let f of film as FilmDettaglio" class="col-md-6 col-lg-4 mb-4">
-      <div class="card h-100 shadow-sm position-relative">
+    <div *ngFor="let f of film; let i = index" class="col-md-6 col-lg-4 mb-4">
+      <div class="card h-100 shadow-sm">
         <img *ngIf="f.poster_path" [src]="'https://image.tmdb.org/t/p/w500' + f.poster_path" class="card-img-top"
-          alt="{{ f.title }}" />
+          [alt]="f.title || 'Poster'" />
         <div class="card-body d-flex flex-column">
-          <h5 class="card-title">{{ f.title }}</h5>
+          <h5 class="card-title mb-1">{{ f.title }}</h5>
           <p class="card-text"><strong>Anno:</strong> {{ f.release_date | date:'yyyy' }}</p>
 
-          <!-- Accordion -->
+          <!-- Dettagli -->
           <div class="accordion mb-3">
             <div class="accordion-item border-0">
               <h2 class="accordion-header">
@@ -27,18 +45,16 @@
                 </button>
               </h2>
               <div [id]="'collapse-' + f.id" class="accordion-collapse collapse" data-bs-parent="#accordion-container">
-                <div class="accordion-body bg-white border rounded shadow p-3 position-absolute start-0 w-100">
-                  <p><strong>Genere:</strong> {{ f.genre_names?.join(', ') || 'N/A' }}</p>
-                  <p><strong>Regista:</strong> {{ f.regista || 'N/A' }}</p>
-                  <p><strong>Attori principali:</strong> {{ f.attori?.join(', ') || 'N/A' }}</p>
+                <div class="accordion-body bg-white border rounded shadow p-3">
+                  <p class="mb-1"><strong>Genere:</strong> {{ f.genre_names?.join(', ') || 'N/A' }}</p>
+                  <p class="mb-1"><strong>Regista:</strong> {{ f.regista || 'N/A' }}</p>
+                  <p class="mb-0"><strong>Attori principali:</strong> {{ f.attori?.join(', ') || 'N/A' }}</p>
                 </div>
               </div>
             </div>
           </div>
 
           <button class="btn btn-success mt-auto" (click)="apriModale(f)">Aggiungi alla collezione</button>
-
-
         </div>
       </div>
     </div>
@@ -49,9 +65,6 @@
     aria-hidden="true">
     <div class="modal-dialog">
       <div class="modal-content">
-
-
-
 
         <div class="modal-body">
           <div class="mb-3">
@@ -80,14 +93,18 @@
             </select>
           </div>
 
-          <!-- Messaggio di conferma -->
+          <!-- Solo avviso, senza pulsante Accedi -->
+          <div *ngIf="noPermessi" class="alert alert-warning mt-3">
+            Operazione riservata. Effettua il login per continuare.
+          </div>
+
           <div *ngIf="confermaSuccesso" class="alert alert-success mt-3">
             Film aggiunto con successo!
           </div>
+
           <div *ngIf="filmGiaPresente" class="alert alert-warning mt-3">
             Il film è già presente nella collezione o nella wishlist.
           </div>
-
         </div>
 
         <div class="modal-footer">
@@ -106,5 +123,6 @@
     </div>
   </div>
 
-
+  <!-- Login Modal (con reference per @ViewChild) -->
+  <app-login-modal #loginRef (loggedIn)="onLoggedIn($event)"></app-login-modal>
 </div>

@@ -1,9 +1,8 @@
 import { Component } from '@angular/core';
 import { Router, RouterModule } from '@angular/router';
-import { NgIf } from '@angular/common';
-import { TmdbService } from '../../services/tmdb.service';
-import { RicercaService } from '../../services/ricerca.service';
 import { FormsModule } from '@angular/forms';
+import { RicercaService } from '../../services/ricerca.service';
+import { TmdbService } from '../../services/tmdb.service';
 
 @Component({
   selector: 'app-navbar',
@@ -17,28 +16,45 @@ export class NavbarComponent {
 
   constructor(
     private router: Router,
-    private tmdbService: TmdbService,
-    private ricercaService: RicercaService
+    private ricercaService: RicercaService,
+    private tmdbService: TmdbService
   ) {}
 
   onSubmit() {
-    const pagina = this.router.url;
-    const query = this.query.trim();
-    if (!query) return;
-    if (pagina.includes('inserimento')) {
-      this.tmdbService.cercaFilm(this.query).subscribe((res) => {
-        this.ricercaService.setRisultatiApi(res.results);
-      });
-    } else if (pagina.includes('cerca')) {
-      this.ricercaService.setQueryLocale(this.query);
+    const q = (this.query || '').trim();
+    if (!q) {
+      this.ricercaService.clear();
+      this.ricercaService.setRicercaEffettuata(true);
+      return;
     }
+
+    // 1) esegui la ricerca su TMDB
+    this.tmdbService.cercaFilm(q).subscribe({
+      next: (res) => {
+        const risultati = Array.isArray(res?.results) ? res.results : [];
+        // 2) pubblica nei subject usati da InserimentoComponent
+        this.ricercaService.setQueryLocale(q);
+        this.ricercaService.setRisultatiApi(risultati);
+        this.ricercaService.setRicercaEffettuata(true);
+
+        // 3) se non sei su /inserimento, vai lì (è la pagina che mostra i risultati)
+        if (!this.router.url.includes('inserimento')) {
+          this.router.navigate(['/inserimento']);
+        }
+      },
+      error: (err) => {
+        console.error('Errore TMDB:', err);
+        this.ricercaService.setQueryLocale(q);
+        this.ricercaService.setRisultatiApi([]);
+        this.ricercaService.setRicercaEffettuata(true);
+        if (!this.router.url.includes('inserimento')) {
+          this.router.navigate(['/inserimento']);
+        }
+      }
+    });
   }
 
-  isInserimentoPage(): boolean {
-    return this.router.url.includes('inserimento');
-  }
-
-  isCercaPage(): boolean {
-    return this.router.url.includes('cerca');
-  }
+  // opzionali se ti servono altrove
+  isInserimentoPage(): boolean { return this.router.url.includes('inserimento'); }
+  isCercaPage(): boolean { return this.router.url.includes('cerca'); }
 }

@@ -1,60 +1,103 @@
-import { Component, OnInit } from '@angular/core';
-import { RicercaService } from '../../services/ricerca.service';
+import { Component, ViewChild, OnInit } from '@angular/core';
+import { HttpErrorResponse } from '@angular/common/http';
 import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
+import Modal from 'bootstrap/js/dist/modal';
+
+import { LoginModalComponent } from '../../components/login-modal/login-modal.component';
+import { RicercaService } from '../../services/ricerca.service';
 import { CollezioneService } from '../../services/collezione.service';
 import { TmdbService } from '../../services/tmdb.service';
-import { FormsModule } from '@angular/forms';
-import { Film } from '../../models/film.model';
-import Modal from 'bootstrap/js/dist/modal';
 import { ListaDesideriService } from '../../services/lista-desideri.service';
+import { AuthService } from '../../services/auth.service';
+
+import { Film } from '../../models/film.model';
 
 @Component({
   selector: 'app-inserimento',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, LoginModalComponent],
   templateUrl: './inserimento.component.html',
   styleUrls: ['./inserimento.component.scss']
 })
-
 export class InserimentoComponent implements OnInit {
+  @ViewChild('loginRef') loginModal!: LoginModalComponent;
+
   film: any[] = [];
-  ricercaEffettuata: boolean = false;
+  ricercaEffettuata = false;
   filmSelezionato: any = null;
   formatoSelezionato: Film['formato'] | '' = '';
   custodiaSelezionata: Film['custodia'] | '' = '';
-  filmGiaPresente: boolean = false;
-  confermaSuccesso: boolean = false;
+  filmGiaPresente = false;
+  confermaSuccesso = false;
+
+  // avviso permessi nel modale
+  noPermessi = false;
 
   constructor(
     private ricercaService: RicercaService,
     private collezioneService: CollezioneService,
     private tmdbService: TmdbService,
-    private listaDesideriService: ListaDesideriService
+    private listaDesideriService: ListaDesideriService,
+    public auth: AuthService
   ) { }
 
   ngOnInit(): void {
     this.ricercaService.risultatiApi$.subscribe((risultati) => {
       this.film = risultati;
     });
-
     this.ricercaService.ricercaApiEffettuata$.subscribe((val) => {
       this.ricercaEffettuata = val;
     });
+  }
+
+  get username(): string | null { return this.auth.getLoggedUsername(); }
+  get loggedIn(): boolean { return this.auth.isLoggedIn(); }
+
+  /**
+   * Apre la login modal in modo sicuro:
+   * - chiude prima qualunque Bootstrap modal aperto (es. confermaAggiuntaModal)
+   * - poi apre la login modal, così non c'è nessun focus trap che blocca l'input
+   */
+  apriLogin(): void {
+    // Chiudi eventuale modal Bootstrap aperto
+    const openModalEl = document.querySelector('.modal.show') as HTMLElement | null;
+    if (openModalEl) {
+      const instance = Modal.getInstance(openModalEl) || new Modal(openModalEl);
+      instance.hide();
+    }
+    // Piccolo delay per permettere a Bootstrap di rimuovere backdrop e classi body
+    setTimeout(() => {
+      this.loginModal?.open();
+    }, 250);
+  }
+
+  onLoggedIn(e: { username: string; password: string }) {
+    this.auth.login(e.username, e.password);
+    this.noPermessi = false;
+    // nessun retry automatico: l’utente ripete l’azione se vuole
+  }
+
+  onLogoutClick(): void {
+    this.auth.logout();
+    alert('Hai effettuato il logout.');
   }
 
   caricaDettagliFilm(film: any): void {
     if (film.dettagliCaricati) return;
 
     this.tmdbService.getDettagliFilm(film.id).subscribe(dettagli => {
-      film.genre_names = dettagli.genres?.map((g: any) => g.name) || [];
+      film.genre_names = dettagli?.genres?.map((g: any) => g.name) ?? [];
     });
 
     this.tmdbService.getCreditiFilm(film.id).subscribe(crediti => {
-      const regista = crediti.crew.find((m: any) => m.job === 'Director');
-      const attoriPrincipali = crediti.cast.slice(0, 3);
+      const crew = crediti?.crew ?? [];
+      const cast = crediti?.cast ?? [];
+      const regista = crew.find((m: any) => m?.job === 'Director');
+      const attoriPrincipali = cast.slice(0, 3);
 
       film.regista = regista ? regista.name : 'N/A';
-      film.attori = attoriPrincipali.map((a: any) => a.name);
+      film.attori = attoriPrincipali.map((a: any) => a?.name).filter(Boolean);
       film.dettagliCaricati = true;
     });
   }
@@ -64,6 +107,8 @@ export class InserimentoComponent implements OnInit {
     this.formatoSelezionato = '';
     this.custodiaSelezionata = '';
     this.confermaSuccesso = false;
+    this.filmGiaPresente = false;
+    this.noPermessi = false;
 
     const modalElement = document.getElementById('confermaAggiuntaModal');
     if (modalElement) {
@@ -89,30 +134,52 @@ export class InserimentoComponent implements OnInit {
 
   mostraMessaggioGiaPresente(): void {
     this.filmGiaPresente = true;
-
-    // Chiudi il modale con un piccolo delay
     const modalElement = document.getElementById('confermaAggiuntaModal');
     if (modalElement) {
       const modal = Modal.getInstance(modalElement);
-      setTimeout(() => {
-        modal?.hide();
-      }, 2000); // aspetta mezzo secondo prima di chiudere il modale
+      setTimeout(() => modal?.hide(), 2000);
     }
-
-    // Lascia visibile il messaggio per 3 secondi
-    setTimeout(() => {
-      this.filmGiaPresente = false;
-    }, 2000);
+    setTimeout(() => (this.filmGiaPresente = false), 2000);
   }
 
+  private buildFilmCollezione(): Film {
+    return {
+      id: `${this.filmSelezionato.id}_${this.formatoSelezionato}_${this.custodiaSelezionata}`,
+      tmdbId: this.filmSelezionato.id,
+      titolo: this.filmSelezionato.title,
+      anno: this.filmSelezionato.release_date
+        ? new Date(this.filmSelezionato.release_date).getFullYear()
+        : 0,
+      posterPath: this.filmSelezionato.poster_path,
+      formato: this.formatoSelezionato as Film['formato'],
+      custodia: this.custodiaSelezionata as Film['custodia'],
+      provenienza: 'collezione'
+    };
+  }
 
+  private buildFilmWishlist(): Film {
+    return {
+      id: `${this.filmSelezionato.id}_${this.formatoSelezionato}_${this.custodiaSelezionata}`,
+      tmdbId: this.filmSelezionato.id,
+      titolo: this.filmSelezionato.title,
+      anno: this.filmSelezionato.release_date
+        ? new Date(this.filmSelezionato.release_date).getFullYear()
+        : 0,
+      posterPath: this.filmSelezionato.poster_path,
+      formato: this.formatoSelezionato as Film['formato'],
+      custodia: this.custodiaSelezionata as Film['custodia'],
+      provenienza: 'wishlist'
+    };
+  }
+
+  isSaving = false;
 
   confermaAggiunta(): void {
-    if (!this.filmSelezionato || !this.formatoSelezionato || !this.custodiaSelezionata) return;
+    if (!this.filmSelezionato || !this.formatoSelezionato || !this.custodiaSelezionata || this.isSaving) return;
+    this.isSaving = true;
 
     const id = `${this.filmSelezionato.id}_${this.formatoSelezionato}_${this.custodiaSelezionata}`;
 
-    // Carica entrambi gli elenchi dal backend
     this.collezioneService.getTuttiIFilm().subscribe(collezione => {
       this.listaDesideriService.getTuttiIFilm().subscribe(wishlist => {
         const filmGiaInCollezione = collezione.some(f => f.id === id);
@@ -123,25 +190,20 @@ export class InserimentoComponent implements OnInit {
           return;
         }
 
-        const filmSalvato: Film = {
-          id,
-          tmdbId: this.filmSelezionato.id,
-          titolo: this.filmSelezionato.title,
-          anno: this.filmSelezionato.release_date
-            ? new Date(this.filmSelezionato.release_date).getFullYear()
-            : 0,
-          posterPath: this.filmSelezionato.poster_path,
-          formato: this.formatoSelezionato as Film['formato'],
-          custodia: this.custodiaSelezionata as Film['custodia'],
-          provenienza: 'collezione'
-        };
+        const filmSalvato = this.buildFilmCollezione();
+
+        console.log('[INSERIMENTO] provo POST aggiunta in collezione', filmSalvato);
 
         this.collezioneService.aggiungiFilm(filmSalvato).subscribe({
           next: () => {
+            this.isSaving = false;
+            this.noPermessi = false;
             this.confermaSuccesso = true;
             this.resetForm();
           },
           error: (err) => {
+            this.isSaving = false;
+            if (err?.status === 401 || err?.status === 403) { this.noPermessi = true; return; }
             console.error('Errore durante l\'aggiunta alla collezione:', err);
           }
         });
@@ -149,13 +211,11 @@ export class InserimentoComponent implements OnInit {
     });
   }
 
-
   aggiungiAllaListaDesideri(): void {
     if (!this.filmSelezionato || !this.formatoSelezionato || !this.custodiaSelezionata) return;
 
     const id = `${this.filmSelezionato.id}_${this.formatoSelezionato}_${this.custodiaSelezionata}`;
 
-    // Carica entrambi gli elenchi dal backend
     this.collezioneService.getTuttiIFilm().subscribe(collezione => {
       this.listaDesideriService.getTuttiIFilm().subscribe(wishlist => {
         const filmGiaInCollezione = collezione.some(f => f.id === id);
@@ -166,25 +226,19 @@ export class InserimentoComponent implements OnInit {
           return;
         }
 
-        const filmDaSalvare: Film = {
-          id,
-          tmdbId: this.filmSelezionato.id,
-          titolo: this.filmSelezionato.title,
-          anno: this.filmSelezionato.release_date
-            ? new Date(this.filmSelezionato.release_date).getFullYear()
-            : 0,
-          posterPath: this.filmSelezionato.poster_path,
-          formato: this.formatoSelezionato as Film['formato'],
-          custodia: this.custodiaSelezionata as Film['custodia'],
-          provenienza: 'lista-desideri'
-        };
+        const filmDaSalvare = this.buildFilmWishlist();
 
         this.listaDesideriService.aggiungiFilm(filmDaSalvare).subscribe({
           next: () => {
+            this.noPermessi = false;
             this.confermaSuccesso = true;
             this.resetForm();
           },
-          error: (err) => {
+          error: (err: HttpErrorResponse) => {
+            if (err.status === 401 || err.status === 403) {
+              this.noPermessi = true;
+              return;
+            }
             console.error('Errore durante il salvataggio nella lista desideri:', err);
           }
         });

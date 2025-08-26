@@ -1,5 +1,24 @@
 <div class="container mt-3">
-  <h2>Lista dei desideri</h2>
+  <div class="d-flex align-items-center justify-content-between">
+    <h2>Lista dei desideri</h2>
+
+    <!-- Toggle Login/Logout -->
+    <button *ngIf="!loggedIn; else logoutBtn" class="btn btn-outline-primary btn-sm" (click)="apriLogin()">
+      Login
+    </button>
+    <ng-template #logoutBtn>
+      <div class="d-flex align-items-center gap-2">
+        <span class="text-muted small" *ngIf="auth.getLoggedUsername()">({{ auth.getLoggedUsername() }})</span>
+        <button class="btn btn-outline-secondary btn-sm" (click)="onLogoutClick()">Logout</button>
+      </div>
+    </ng-template>
+  </div>
+
+  <div *ngIf="noPermessiMsg" class="alert alert-warning mt-2 d-flex align-items-center justify-content-between">
+    <span>{{ noPermessiMsg }}</span>
+    <button class="btn btn-sm btn-primary ms-3" (click)="apriLogin()">Accedi</button>
+  </div>
+
   <div class="row">
     <div class="col-md-4" *ngFor="let film of listaDesideri">
       <div class="card mb-3">
@@ -16,4 +35,8 @@
       </div>
     </div>
   </div>
+
+  <!-- Login Modal (si apre solo su click) -->
+  <app-login-modal #loginRef (loggedIn)="onLoggedIn($event)"></app-login-modal>
+
 </div>

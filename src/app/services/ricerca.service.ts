@@ -1,37 +1,78 @@
 import { Injectable } from '@angular/core';
-import { BehaviorSubject, Observable } from 'rxjs';
+import { BehaviorSubject, of } from 'rxjs';
+import { catchError, map, tap } from 'rxjs/operators';
+import { TmdbService } from './tmdb.service';
 
-@Injectable({
-  providedIn: 'root'
-})
+@Injectable({ providedIn: 'root' })
 export class RicercaService {
-  // Per la ricerca API (pagina inserimento)
-  private risultatiApiSource = new BehaviorSubject<any[]>([]);
-  risultatiApi$ = this.risultatiApiSource.asObservable();
-
-  // 🔽 NOVITÀ: indica se è stata effettuata una ricerca API
-  private ricercaApiEffettuataSource = new BehaviorSubject<boolean>(false);
-  ricercaApiEffettuata$ = this.ricercaApiEffettuataSource.asObservable();
-
-  // Per la ricerca locale (pagina cerca)
-  private queryLocaleSource = new BehaviorSubject<string>('');
-  queryLocale$ = this.queryLocaleSource.asObservable();
-
+  // 🔎 Query corrente (in minuscolo per i filtri lato UI)
   private querySubject = new BehaviorSubject<string>('');
-  query$: Observable<string> = this.querySubject.asObservable();
+  query$ = this.querySubject.asObservable();
 
+  // 📄 Risultati TMDB (solo array results)
+  private risultatiApiSubject = new BehaviorSubject<any[]>([]);
+  risultatiApi$ = this.risultatiApiSubject.asObservable();
 
-  setRisultatiApi(risultati: any[]) {
-    this.risultatiApiSource.next(risultati);
-    this.ricercaApiEffettuataSource.next(true);  // 🔽 imposta flag ricerca effettuata
+  // ✅ Flag “ricerca effettuata”
+  private ricercaApiEffettuataSubject = new BehaviorSubject<boolean>(false);
+  ricercaApiEffettuata$ = this.ricercaApiEffettuataSubject.asObservable();
+
+  constructor(private tmdb: TmdbService) {}
+
+  /**
+   * Flusso integrato: invoca TMDB e pubblica SOLO 'results'.
+   */
+  cerca(query: string): void {
+    const q = (query || '').trim();
+    this.querySubject.next(q.toLowerCase());
+
+    if (!q) {
+      this.risultatiApiSubject.next([]);
+      this.ricercaApiEffettuataSubject.next(true);
+      return;
+    }
+
+    this.tmdb.cercaFilm(q).pipe(
+      map((res: any) => Array.isArray(res?.results) ? res.results : []),
+      tap(() => this.ricercaApiEffettuataSubject.next(true)),
+      catchError(err => {
+        console.error('Errore TMDB durante la ricerca:', err);
+        this.ricercaApiEffettuataSubject.next(true);
+        return of([] as any[]);
+      })
+    ).subscribe(lista => {
+      this.risultatiApiSubject.next(lista);
+    });
   }
 
-  setQueryLocale(query: string) {
-    this.queryLocaleSource.next(query);
+  /**
+   * Flusso “legacy”: consenti alla Navbar (o ad altri) di settare direttamente i risultati.
+   * Emette anche ricercaEffettuata=true.
+   */
+  setRisultatiApi(results: any[]): void {
+    const lista = Array.isArray(results) ? results : [];
+    this.risultatiApiSubject.next(lista);
+    this.ricercaApiEffettuataSubject.next(true);
   }
 
-  // ✅ Metodo per leggere la query locale direttamente
-  getQueryLocale(): string {
-    return this.queryLocaleSource.value;
+  /**
+   * Flusso “legacy”: aggiorna solo la query locale (senza chiamare TMDB).
+   */
+  setQueryLocale(q: string): void {
+    const s = (q || '').trim().toLowerCase();
+    this.querySubject.next(s);
+  }
+
+  /**
+   * Utility opzionali
+   */
+  clear(): void {
+    this.querySubject.next('');
+    this.risultatiApiSubject.next([]);
+    this.ricercaApiEffettuataSubject.next(false);
+  }
+
+  setRicercaEffettuata(v: boolean): void {
+    this.ricercaApiEffettuataSubject.next(!!v);
   }
 }
