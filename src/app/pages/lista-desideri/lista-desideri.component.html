@@ -3,23 +3,26 @@
     <h2>Lista dei desideri</h2>
 
     <!-- Toggle Login/Logout -->
-    <button *ngIf="!loggedIn; else logoutBtn" class="btn btn-outline-primary btn-sm" (click)="apriLogin()">
+    <button *ngIf="!loggedIn; else logoutBtn" class="btn btn-outline-primary btn-sm" (click)="procediAlLogin()">
       Login
     </button>
     <ng-template #logoutBtn>
       <div class="d-flex align-items-center gap-2">
-        <span class="text-muted small" *ngIf="auth.getLoggedUsername()">({{ auth.getLoggedUsername() }})</span>
+        <span class="text-muted small" *ngIf="username">({{ username }})</span>
         <button class="btn btn-outline-secondary btn-sm" (click)="onLogoutClick()">Logout</button>
       </div>
     </ng-template>
   </div>
 
-  <div *ngIf="noPermessiMsg" class="alert alert-warning mt-2 d-flex align-items-center justify-content-between">
-    <span>{{ noPermessiMsg }}</span>
-    <button class="btn btn-sm btn-primary ms-3" (click)="apriLogin()">Accedi</button>
+  <!-- Avvisi -->
+  <div *ngIf="azioneMsg" class="alert alert-success mt-2">
+    {{ azioneMsg }}
+  </div>
+  <div *ngIf="noPermessiMsg" class="alert alert-warning mt-2">
+    {{ noPermessiMsg }}
   </div>
 
-  <div class="row">
+  <div class="row mt-3">
     <div class="col-md-4" *ngFor="let film of listaDesideri">
       <div class="card mb-3">
         <img [src]="'https://image.tmdb.org/t/p/w300' + film.posterPath" class="card-img-top" *ngIf="film.posterPath" />
@@ -29,14 +32,57 @@
             Formato: {{ film.formato }}<br>
             Custodia: {{ film.custodia }}
           </p>
-          <button class="btn btn-success me-2" (click)="aggiungiAllaCollezione(film)">Aggiungi alla collezione</button>
-          <button class="btn btn-danger" (click)="elimina(film)">Elimina</button>
+          <div class="d-flex gap-2">
+            <button class="btn btn-success" (click)="onClickAggiungiAllaCollezione(film)">Aggiungi alla collezione</button>
+            <button class="btn btn-danger" (click)="onClickElimina(film)">Elimina</button>
+          </div>
         </div>
       </div>
     </div>
   </div>
 
-  <!-- Login Modal (si apre solo su click) -->
-  <app-login-modal #loginRef (loggedIn)="onLoggedIn($event)"></app-login-modal>
+  <!-- Modale: ACCESSO RICHIESTO (gate) -->
+  <div class="modal fade" id="loginRequiredModal" tabindex="-1" aria-labelledby="loginRequiredLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 id="loginRequiredLabel" class="modal-title">Accesso richiesto</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Chiudi"></button>
+        </div>
+        <div class="modal-body">
+          Per eseguire questa operazione devi effettuare l’accesso.
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-outline-secondary" data-bs-dismiss="modal">Annulla</button>
+          <button class="btn btn-primary" (click)="procediAlLogin()">Accedi</button>
+        </div>
+      </div>
+    </div>
+  </div>
 
+  <!-- Modale: CONFERMA RIMOZIONE -->
+  <div class="modal fade" id="confirmDeleteModal" tabindex="-1" aria-labelledby="confirmDeleteLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 id="confirmDeleteLabel" class="modal-title">Conferma rimozione</h5>
+          <button type="button" class="btn-close" aria-label="Chiudi" (click)="annullaDelete()"></button>
+        </div>
+        <div class="modal-body">
+          Vuoi rimuovere
+          <strong>{{ selectedForDelete?.titolo }}</strong>
+          dalla lista desideri?
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-outline-secondary" (click)="annullaDelete()">Annulla</button>
+          <button class="btn btn-danger" [disabled]="isDeleting" (click)="confermaDelete()">
+            {{ isDeleting ? 'Rimozione…' : 'Rimuovi' }}
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Login Modal -->
+  <app-login-modal #loginRef (loggedIn)="onLoggedIn($event)"></app-login-modal>
 </div>
