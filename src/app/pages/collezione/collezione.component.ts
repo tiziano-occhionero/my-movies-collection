@@ -58,7 +58,7 @@ export class CollezioneComponent implements OnInit {
       }
     });
 
-    this.ricercaService.query$.subscribe((query: string) => {
+    this.ricercaService.collezioneQuery$.subscribe((query: string) => {
       this.queryCorrente = query;
       this.query = query.toLowerCase();
       this.applicaRicerca();

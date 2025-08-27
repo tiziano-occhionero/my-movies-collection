@@ -5,27 +5,25 @@ import { TmdbService } from './tmdb.service';
 
 @Injectable({ providedIn: 'root' })
 export class RicercaService {
-  // 🔎 Query corrente (in minuscolo per i filtri lato UI)
-  private querySubject = new BehaviorSubject<string>('');
-  query$ = this.querySubject.asObservable();
-
-  // 📄 Risultati TMDB (solo array results)
+  // ===== Inserimento (TMDB) =====
   private risultatiApiSubject = new BehaviorSubject<any[]>([]);
   risultatiApi$ = this.risultatiApiSubject.asObservable();
 
-  // ✅ Flag “ricerca effettuata”
   private ricercaApiEffettuataSubject = new BehaviorSubject<boolean>(false);
   ricercaApiEffettuata$ = this.ricercaApiEffettuataSubject.asObservable();
 
+  // ===== Query locali per pagina =====
+  private collezioneQuerySubject = new BehaviorSubject<string>('');
+  collezioneQuery$ = this.collezioneQuerySubject.asObservable();
+
+  private wishlistQuerySubject = new BehaviorSubject<string>('');
+  wishlistQuery$ = this.wishlistQuerySubject.asObservable();
+
   constructor(private tmdb: TmdbService) {}
 
-  /**
-   * Flusso integrato: invoca TMDB e pubblica SOLO 'results'.
-   */
+  // ====== INSERIMENTO (TMDB) ======
   cerca(query: string): void {
     const q = (query || '').trim();
-    this.querySubject.next(q.toLowerCase());
-
     if (!q) {
       this.risultatiApiSubject.next([]);
       this.ricercaApiEffettuataSubject.next(true);
@@ -45,34 +43,42 @@ export class RicercaService {
     });
   }
 
-  /**
-   * Flusso “legacy”: consenti alla Navbar (o ad altri) di settare direttamente i risultati.
-   * Emette anche ricercaEffettuata=true.
-   */
   setRisultatiApi(results: any[]): void {
     const lista = Array.isArray(results) ? results : [];
     this.risultatiApiSubject.next(lista);
     this.ricercaApiEffettuataSubject.next(true);
   }
 
-  /**
-   * Flusso “legacy”: aggiorna solo la query locale (senza chiamare TMDB).
-   */
-  setQueryLocale(q: string): void {
-    const s = (q || '').trim().toLowerCase();
-    this.querySubject.next(s);
+  setRicercaEffettuata(v: boolean): void {
+    this.ricercaApiEffettuataSubject.next(!!v);
   }
 
-  /**
-   * Utility opzionali
-   */
-  clear(): void {
-    this.querySubject.next('');
+  // ====== COLLEZIONE / WISHLIST (local filters) ======
+  setCollezioneQuery(q: string): void {
+    this.collezioneQuerySubject.next((q || '').trim().toLowerCase());
+  }
+
+  clearCollezioneQuery(): void {
+    this.collezioneQuerySubject.next('');
+  }
+
+  setWishlistQuery(q: string): void {
+    this.wishlistQuerySubject.next((q || '').trim().toLowerCase());
+  }
+
+  clearWishlistQuery(): void {
+    this.wishlistQuerySubject.next('');
+  }
+
+  // ====== Utility reset mirati ======
+  clearInserimento(): void {
     this.risultatiApiSubject.next([]);
     this.ricercaApiEffettuataSubject.next(false);
   }
 
-  setRicercaEffettuata(v: boolean): void {
-    this.ricercaApiEffettuataSubject.next(!!v);
+  clearAll(): void {
+    this.clearInserimento();
+    this.clearCollezioneQuery();
+    this.clearWishlistQuery();
   }
 }
