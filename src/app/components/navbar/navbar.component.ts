@@ -1,8 +1,9 @@
 import { Component } from '@angular/core';
-import { Router, RouterModule } from '@angular/router';
+import { Router, RouterModule, NavigationEnd } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { RicercaService } from '../../services/ricerca.service';
 import { TmdbService } from '../../services/tmdb.service';
+import { filter } from 'rxjs/operators';
 
 @Component({
   selector: 'app-navbar',
@@ -18,7 +19,14 @@ export class NavbarComponent {
     private router: Router,
     private ricercaService: RicercaService,
     private tmdbService: TmdbService
-  ) {}
+  ) {
+    // Svuota la barra di ricerca ad ogni cambio rotta
+    this.router.events
+      .pipe(filter(e => e instanceof NavigationEnd))
+      .subscribe(() => {
+        this.query = '';
+      });
+  }
 
   onSubmit() {
     const q = (this.query || '').trim();
