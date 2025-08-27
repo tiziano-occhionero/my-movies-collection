@@ -22,19 +22,28 @@ import Modal from 'bootstrap/js/dist/modal';
 export class ListaDesideriComponent implements OnInit {
   @ViewChild('loginRef') loginModal!: LoginModalComponent;
 
+  // Dati
   listaDesideri: Film[] = [];
-  isOnline: boolean = true;
+  listaDesideriFiltrata: Film[] = [];
 
-  // avvisi
+  // Stato rete / auth
+  isOnline: boolean = true;
+  get loggedIn(): boolean { return this.auth.isLoggedIn(); }
+  get username(): string | null { return this.auth.getLoggedUsername(); }
+
+  // Avvisi
   noPermessiMsg: string = '';
   azioneMsg: string = '';
 
-  // stato rimozione
+  // Stato rimozione
   selectedForDelete: Film | null = null;
   isDeleting = false;
 
-  // azione pendente post-login
+  // Azione pendente post-login
   private pendingAfterLogin: { action: 'delete' | 'move'; film: Film } | null = null;
+
+  // Query corrente (solo display/filtri)
+  private wishlistQueryView: string = '';
 
   constructor(
     private collezioneService: CollezioneService,
@@ -43,15 +52,19 @@ export class ListaDesideriComponent implements OnInit {
     private http: HttpClient,
     private ricercaService: RicercaService,
     public auth: AuthService
-  ) { }
+  ) {}
 
   ngOnInit(): void {
+    // Stato rete + primi dati
     this.networkService.isOnline().subscribe(isOnline => {
       this.isOnline = isOnline;
 
       if (isOnline) {
         this.listaDesideriService.getTuttiIFilm().subscribe({
-          next: (dati) => this.listaDesideri = dati,
+          next: (dati) => {
+            this.listaDesideri = dati ?? [];
+            this.applicaFiltro();
+          },
           error: (err) => {
             console.error('Errore nel caricamento da backend:', err);
             this.caricaDaLocale();
@@ -61,12 +74,33 @@ export class ListaDesideriComponent implements OnInit {
         this.caricaDaLocale();
       }
     });
+
+    // 🔎 ascolta la query da navbar (wishlist)
+    this.ricercaService.wishlistQuery$.subscribe(q => {
+      this.wishlistQueryView = q;
+      this.applicaFiltro();
+    });
   }
 
-  get loggedIn(): boolean { return this.auth.isLoggedIn(); }
-  get username(): string | null { return this.auth.getLoggedUsername(); }
+  // ---------- Helpers filtro ----------
+  private applicaFiltro(): void {
+    const q = (this.wishlistQueryView || '').trim().toLowerCase();
+    if (!q) {
+      this.listaDesideriFiltrata = [...this.listaDesideri];
+      return;
+    }
+    this.listaDesideriFiltrata = this.listaDesideri.filter(f =>
+      (f.titolo || '').toLowerCase().includes(q)
+    );
+  }
 
-  // ---------- Helpers modali (come in Inserimento/Collezione) ----------
+  private caricaDaLocale(): void {
+    const data = localStorage.getItem('listaDesideri');
+    this.listaDesideri = data ? JSON.parse(data) : [];
+    this.applicaFiltro();
+  }
+
+  // ---------- Modali login/gate ----------
   private openLoginModalSafely(): void {
     const open = document.querySelector('.modal.show') as HTMLElement | null;
     if (open) (Modal.getInstance(open) || new Modal(open)).hide();
@@ -85,7 +119,6 @@ export class ListaDesideriComponent implements OnInit {
     this.closeLoginRequired();
     this.openLoginModalSafely();
   }
-
   apriLogin(): void {
     const open = document.querySelector('.modal.show') as HTMLElement | null;
     if (open) (Modal.getInstance(open) || new Modal(open)).hide();
@@ -94,11 +127,10 @@ export class ListaDesideriComponent implements OnInit {
 
   onLoggedIn(e: { username: string; password: string }) {
     this.auth.login(e.username, e.password);
-    // chiudi login modal se disponibile
     this.loginModal?.close?.();
     this.noPermessiMsg = '';
 
-    // riprendi eventuale azione
+    // Riprendi eventuale azione
     if (this.pendingAfterLogin) {
       const { action, film } = this.pendingAfterLogin;
       this.pendingAfterLogin = null;
@@ -117,12 +149,7 @@ export class ListaDesideriComponent implements OnInit {
     alert('Hai effettuato il logout.');
   }
 
-  private caricaDaLocale(): void {
-    const data = localStorage.getItem('listaDesideri');
-    this.listaDesideri = data ? JSON.parse(data) : [];
-  }
-
-  // ---------- Click handlers pubblici ----------
+  // ---------- Click handlers ----------
   onClickElimina(film: Film): void {
     this.noPermessiMsg = '';
     if (!this.isOnline) {
@@ -161,6 +188,7 @@ export class ListaDesideriComponent implements OnInit {
     const el = document.getElementById('confirmDeleteModal');
     if (!el) return;
     (Modal.getInstance(el) || new Modal(el)).hide();
+    this.selectedForDelete = null;
   }
 
   confermaDelete(): void {
@@ -170,19 +198,20 @@ export class ListaDesideriComponent implements OnInit {
     const el = document.getElementById('confirmDeleteModal');
     const inst = el ? (Modal.getInstance(el) || new Modal(el)) : null;
 
-    this.listaDesideriService.rimuoviFilm(this.selectedForDelete.id)
+    const id = this.selectedForDelete.id;
+    this.listaDesideriService.rimuoviFilm(id)
       .then(() => {
         inst?.hide();
-        // aggiorna UI locale
-        this.listaDesideri = this.listaDesideri.filter(f => f.id !== this.selectedForDelete!.id);
+        // Aggiorna dati e UI
+        this.listaDesideri = this.listaDesideri.filter(f => f.id !== id);
         localStorage.setItem('listaDesideri', JSON.stringify(this.listaDesideri));
+        this.applicaFiltro();
         this.azioneMsg = 'Film rimosso dalla wishlist.';
         setTimeout(() => this.azioneMsg = '', 3000);
       })
       .catch((e: any) => {
         const err = e as HttpErrorResponse;
         if (err?.status === 401 || err?.status === 403) {
-          // sessione assente/scaduta → chiedi login e riprendi dopo
           this.pendingAfterLogin = { action: 'delete', film: this.selectedForDelete! };
           inst?.hide();
           this.openLoginRequired();
@@ -194,6 +223,7 @@ export class ListaDesideriComponent implements OnInit {
       })
       .finally(() => {
         this.isDeleting = false;
+        this.selectedForDelete = null;
       });
   }
 
@@ -201,20 +231,19 @@ export class ListaDesideriComponent implements OnInit {
   private performMoveToCollection(film: Film): void {
     // 1) rimuovi dalla wishlist
     this.listaDesideriService.rimuoviFilm(film.id).then(() => {
-      // 2) aggiungi in collezione (cambiando provenienza)
+      // 2) aggiungi in collezione
       const filmConvertito: Film = { ...film, provenienza: 'collezione' as 'collezione' };
-
       this.collezioneService.aggiungiFilm(filmConvertito).subscribe({
         next: () => {
-          // aggiorna UI locale
+          // aggiorna dati e UI
           this.listaDesideri = this.listaDesideri.filter(f => f.id !== film.id);
           localStorage.setItem('listaDesideri', JSON.stringify(this.listaDesideri));
+          this.applicaFiltro();
           this.azioneMsg = 'Spostato in collezione.';
           setTimeout(() => this.azioneMsg = '', 3000);
         },
         error: (err: HttpErrorResponse) => {
           if (err.status === 401 || err.status === 403) {
-            // chiedi login e riprendi l’azione dopo
             this.pendingAfterLogin = { action: 'move', film };
             this.openLoginRequired();
             return;

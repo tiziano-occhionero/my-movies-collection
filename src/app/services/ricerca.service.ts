@@ -5,25 +5,35 @@ import { TmdbService } from './tmdb.service';
 
 @Injectable({ providedIn: 'root' })
 export class RicercaService {
-  // ===== Inserimento (TMDB) =====
-  private risultatiApiSubject = new BehaviorSubject<any[]>([]);
-  risultatiApi$ = this.risultatiApiSubject.asObservable();
+  // Query corrente per Inserimento
+  private querySubject = new BehaviorSubject<string>('');
+  query$ = this.querySubject.asObservable();
 
-  private ricercaApiEffettuataSubject = new BehaviorSubject<boolean>(false);
-  ricercaApiEffettuata$ = this.ricercaApiEffettuataSubject.asObservable();
-
-  // ===== Query locali per pagina =====
+  // Query per Collezione
   private collezioneQuerySubject = new BehaviorSubject<string>('');
   collezioneQuery$ = this.collezioneQuerySubject.asObservable();
 
+  // Query per Wishlist
   private wishlistQuerySubject = new BehaviorSubject<string>('');
   wishlistQuery$ = this.wishlistQuerySubject.asObservable();
 
+  // Risultati TMDB per Inserimento
+  private risultatiApiSubject = new BehaviorSubject<any[]>([]);
+  risultatiApi$ = this.risultatiApiSubject.asObservable();
+
+  // Flag per "ricerca effettuata"
+  private ricercaApiEffettuataSubject = new BehaviorSubject<boolean>(false);
+  ricercaApiEffettuata$ = this.ricercaApiEffettuataSubject.asObservable();
+
   constructor(private tmdb: TmdbService) {}
 
-  // ====== INSERIMENTO (TMDB) ======
+  // =============================
+  // Inserimento
+  // =============================
   cerca(query: string): void {
     const q = (query || '').trim();
+    this.querySubject.next(q.toLowerCase());
+
     if (!q) {
       this.risultatiApiSubject.next([]);
       this.ricercaApiEffettuataSubject.next(true);
@@ -44,16 +54,33 @@ export class RicercaService {
   }
 
   setRisultatiApi(results: any[]): void {
-    const lista = Array.isArray(results) ? results : [];
-    this.risultatiApiSubject.next(lista);
+    this.risultatiApiSubject.next(Array.isArray(results) ? results : []);
     this.ricercaApiEffettuataSubject.next(true);
+  }
+
+  setQueryLocale(q: string): void {
+    this.querySubject.next((q || '').trim().toLowerCase());
+  }
+
+  clear(): void {
+    this.querySubject.next('');
+    this.risultatiApiSubject.next([]);
+    this.ricercaApiEffettuataSubject.next(false);
+  }
+
+  clearAll(): void {
+    this.clear();
+    this.clearCollezioneQuery();
+    this.clearWishlistQuery();
   }
 
   setRicercaEffettuata(v: boolean): void {
     this.ricercaApiEffettuataSubject.next(!!v);
   }
 
-  // ====== COLLEZIONE / WISHLIST (local filters) ======
+  // =============================
+  // Collezione
+  // =============================
   setCollezioneQuery(q: string): void {
     this.collezioneQuerySubject.next((q || '').trim().toLowerCase());
   }
@@ -62,23 +89,14 @@ export class RicercaService {
     this.collezioneQuerySubject.next('');
   }
 
+  // =============================
+  // Wishlist
+  // =============================
   setWishlistQuery(q: string): void {
     this.wishlistQuerySubject.next((q || '').trim().toLowerCase());
   }
 
   clearWishlistQuery(): void {
     this.wishlistQuerySubject.next('');
-  }
-
-  // ====== Utility reset mirati ======
-  clearInserimento(): void {
-    this.risultatiApiSubject.next([]);
-    this.ricercaApiEffettuataSubject.next(false);
-  }
-
-  clearAll(): void {
-    this.clearInserimento();
-    this.clearCollezioneQuery();
-    this.clearWishlistQuery();
   }
 }
