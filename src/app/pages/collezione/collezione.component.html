@@ -4,31 +4,29 @@
     <h2>Risultati ricerca nella collezione</h2>
 
     <!-- Toggle Login/Logout -->
-    <button *ngIf="!loggedIn; else logoutBtn" class="btn btn-outline-primary btn-sm" (click)="apriLogin()">
+    <button *ngIf="!loggedIn; else logoutBtn" class="btn btn-outline-primary btn-sm" (click)="procediAlLogin()">
       Login
     </button>
     <ng-template #logoutBtn>
       <div class="d-flex align-items-center gap-2">
-        <span class="text-muted small" *ngIf="auth.getLoggedUsername()">({{ auth.getLoggedUsername() }})</span>
+        <span class="text-muted small" *ngIf="username">({{ username }})</span>
         <button class="btn btn-outline-secondary btn-sm" (click)="onLogoutClick()">Logout</button>
       </div>
     </ng-template>
   </div>
 
-  <div *ngIf="noPermessiMsg" class="alert alert-warning mt-2 d-flex align-items-center justify-content-between">
-    <span>{{ noPermessiMsg }}</span>
-    <button class="btn btn-sm btn-primary ms-3" (click)="apriLogin()">Accedi</button>
-  </div>
-
-  <div *ngIf="loadErrorMsg" class="alert alert-danger mt-2">
-    {{ loadErrorMsg }}
-  </div>
-
+  <!-- Avvisi caricamento e azioni -->
   <div *ngIf="messaggio" class="alert alert-success mt-2">
     {{ messaggio }}
   </div>
+  <div *ngIf="loadErrorMsg" class="alert alert-warning mt-2">
+    {{ loadErrorMsg }}
+  </div>
+  <div *ngIf="noPermessiMsg" class="alert alert-warning mt-2">
+    {{ noPermessiMsg }}
+  </div>
 
-  <div class="d-flex justify-content-start mb-3">
+  <div class="d-flex justify-content-start mb-3 mt-2">
     <div class="dropdown me-3">
       <button class="btn btn-outline-primary dropdown-toggle" type="button" data-bs-toggle="dropdown">
         Vista
@@ -65,8 +63,8 @@
             <p class="card-text">{{ f.anno }}</p>
             <p><strong>Formato:</strong> {{ f.formato }}</p>
             <p><strong>Custodia:</strong> {{ f.custodia }}</p>
-            <button class="btn btn-danger btn-sm" (click)="rimuoviDaCollezione(f)"
-              [disabled]="!isOnline">Rimuovi</button>
+
+            <button class="btn btn-danger btn-sm" (click)="onClickRimuovi(f)">Rimuovi</button>
           </div>
         </div>
       </div>
@@ -74,16 +72,58 @@
 
     <div *ngIf="vista === 'elenco'">
       <ul class="list-group">
-        <li *ngFor="let f of film" class="list-group-item">
-          {{ f.titolo }} ({{ f.anno }}) - {{ f.formato }} - {{ f.custodia }}
-          <button class="btn btn-danger btn-sm ms-2" (click)="rimuoviDaCollezione(f)"
-            [disabled]="!isOnline">Rimuovi</button>
+        <li *ngFor="let f of film" class="list-group-item d-flex align-items-center justify-content-between">
+          <span>
+            {{ f.titolo }} ({{ f.anno }}) - {{ f.formato }} - {{ f.custodia }}
+          </span>
+          <button class="btn btn-danger btn-sm" (click)="onClickRimuovi(f)">Rimuovi</button>
         </li>
       </ul>
     </div>
   </div>
 
-  <!-- Login Modal (si apre solo su click) -->
-  <app-login-modal #loginRef (loggedIn)="onLoggedIn($event)"></app-login-modal>
+  <!-- Modale: ACCESSO RICHIESTO (gate) -->
+  <div class="modal fade" id="loginRequiredModal" tabindex="-1" aria-labelledby="loginRequiredLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 id="loginRequiredLabel" class="modal-title">Accesso richiesto</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Chiudi"></button>
+        </div>
+        <div class="modal-body">
+          Per rimuovere film dalla collezione devi effettuare l’accesso.
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-outline-secondary" data-bs-dismiss="modal">Annulla</button>
+          <button class="btn btn-primary" (click)="procediAlLogin()">Accedi</button>
+        </div>
+      </div>
+    </div>
+  </div>
 
+  <!-- Modale: CONFERMA RIMOZIONE -->
+  <div class="modal fade" id="confirmDeleteModal" tabindex="-1" aria-labelledby="confirmDeleteLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 id="confirmDeleteLabel" class="modal-title">Conferma rimozione</h5>
+          <button type="button" class="btn-close" aria-label="Chiudi" (click)="annullaDelete()"></button>
+        </div>
+        <div class="modal-body">
+          Vuoi rimuovere
+          <strong>{{ selectedForDelete?.titolo }}</strong>
+          dalla collezione?
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-outline-secondary" (click)="annullaDelete()">Annulla</button>
+          <button class="btn btn-danger" [disabled]="isDeleting" (click)="confermaDelete()">
+            {{ isDeleting ? 'Rimozione…' : 'Rimuovi' }}
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Login Modal -->
+  <app-login-modal #loginRef (loggedIn)="onLoggedIn($event)"></app-login-modal>
 </div>

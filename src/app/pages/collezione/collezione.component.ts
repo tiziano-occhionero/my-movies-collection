@@ -9,6 +9,7 @@ import { AuthService } from '../../services/auth.service';
 
 import { Film } from '../../models/film.model';
 import { LoginModalComponent } from '../../components/login-modal/login-modal.component';
+import Modal from 'bootstrap/js/dist/modal';
 
 @Component({
   selector: 'app-collezione',
@@ -33,6 +34,13 @@ export class CollezioneComponent implements OnInit {
   noPermessiMsg: string = '';
   loadErrorMsg: string = '';
 
+  // stato rimozione
+  selectedForDelete: Film | null = null;
+  isDeleting = false;
+
+  // azione pendente post-login
+  private pendingAfterLogin: { action: 'delete'; film: Film } | null = null;
+
   constructor(
     private collezioneService: CollezioneService,
     private ricercaService: RicercaService,
@@ -52,7 +60,7 @@ export class CollezioneComponent implements OnInit {
 
     this.ricercaService.query$.subscribe((query: string) => {
       this.queryCorrente = query;
-      this.query = (query || '').toLowerCase();
+      this.query = query.toLowerCase();
       this.applicaRicerca();
     });
   }
@@ -60,14 +68,52 @@ export class CollezioneComponent implements OnInit {
   get loggedIn(): boolean { return this.auth.isLoggedIn(); }
   get username(): string | null { return this.auth.getLoggedUsername(); }
 
+  // ---------- Login helpers (stesso pattern di Inserimento) ----------
+  private openLoginModalSafely(): void {
+    const openModalEl = document.querySelector('.modal.show') as HTMLElement | null;
+    if (openModalEl) {
+      const inst = Modal.getInstance(openModalEl) || new Modal(openModalEl);
+      inst.hide();
+    }
+    setTimeout(() => this.loginModal?.open(), 200);
+  }
+
+  private openLoginRequired(): void {
+    const el = document.getElementById('loginRequiredModal');
+    if (el) new Modal(el).show();
+  }
+  private closeLoginRequired(): void {
+    const el = document.getElementById('loginRequiredModal');
+    if (!el) return;
+    const inst = Modal.getInstance(el) || new Modal(el);
+    inst.hide();
+  }
+
+  procediAlLogin(): void {
+    this.closeLoginRequired();
+    this.openLoginModalSafely();
+  }
+
   apriLogin(): void {
-    this.loginModal?.open();
+    const openModalEl = document.querySelector('.modal.show') as HTMLElement | null;
+    if (openModalEl) {
+      const instance = Modal.getInstance(openModalEl) || new Modal(openModalEl);
+      instance.hide();
+    }
+    setTimeout(() => this.loginModal?.open(), 250);
   }
 
   onLoggedIn(e: { username: string; password: string }) {
     this.auth.login(e.username, e.password);
-    this.noPermessiMsg = '';
-    if (this.isOnline) this.caricaDaBackend();
+    // chiudi il login modal se espone close()
+    this.loginModal?.close?.();
+
+    // riprendi azione pendente
+    if (this.pendingAfterLogin?.action === 'delete' && this.pendingAfterLogin.film) {
+      this.selectedForDelete = this.pendingAfterLogin.film;
+      this.pendingAfterLogin = null;
+      this.apriConfermaDelete();
+    }
   }
 
   onLogoutClick(): void {
@@ -75,10 +121,10 @@ export class CollezioneComponent implements OnInit {
     alert('Hai effettuato il logout.');
   }
 
+  // ---------- Data load ----------
   private caricaDaBackend(): void {
     const snapshot = [...this.tuttiIFilm];
     this.loadErrorMsg = '';
-    this.noPermessiMsg = '';
 
     this.collezioneService.getTuttiIFilm().subscribe({
       next: (dati) => {
@@ -98,14 +144,14 @@ export class CollezioneComponent implements OnInit {
   }
 
   private caricaDaLocale(): void {
-    this.tuttiIFilm = this.collezioneService.getCollezione();
+    // se in futuro vuoi davvero locale, reintroduci getCollezione(); ora carichiamo solo da backend/snapshot
     this.film = [...this.tuttiIFilm];
     this.applicaRicerca();
   }
 
   private applicaRicerca(): void {
     this.film = this.tuttiIFilm.filter(f =>
-      (f.titolo || '').toLowerCase().includes(this.query)
+      f.titolo.toLowerCase().includes(this.query)
     );
     this.applicaOrdinamento();
   }
@@ -117,69 +163,6 @@ export class CollezioneComponent implements OnInit {
   setOrdina(tipo: string): void {
     this.ordinamento = tipo;
     this.applicaOrdinamento();
-  }
-
-  async rimuoviDaCollezione(f: Film): Promise<void> {
-    const conferma = confirm(`Rimuovere "${f.titolo}" dalla collezione?`);
-    if (!conferma) return;
-
-    // reset messaggi
-    this.messaggio = '';
-    this.noPermessiMsg = '';
-    this.loadErrorMsg = '';
-
-    // OFFLINE: aggiorna solo localStorage
-    if (!this.isOnline) {
-      const key = 'collezioneFilm';
-      const corrente: Film[] = this.collezioneService.getCollezione();
-      const aggiornata = (corrente || []).filter(x => x.id !== f.id);
-      localStorage.setItem(key, JSON.stringify(aggiornata));
-
-      // aggiorna UI
-      this.tuttiIFilm = aggiornata;
-      this.applicaRicerca();
-      this.messaggio = 'Film rimosso dalla collezione.';
-      setTimeout(() => (this.messaggio = ''), 3000);
-      return;
-    }
-
-    // ONLINE: rimozione ottimistica
-    const snapshot = [...this.tuttiIFilm];
-    // 1) togli subito dalla UI
-    this.tuttiIFilm = this.tuttiIFilm.filter(x => x.id !== f.id);
-    this.applicaRicerca();
-
-    try {
-      console.log('[COLLEZIONE] DELETE id =', f.id);
-      await this.collezioneService.rimuoviFilm(f.id);
-
-      // 2) tenta un refresh dal backend (se fallisce, lasciamo la lista com'è)
-      this.collezioneService.getTuttiIFilm().subscribe({
-        next: (dati) => {
-          this.tuttiIFilm = dati ?? [];
-          this.applicaRicerca();
-          this.messaggio = 'Film rimosso dalla collezione.';
-          setTimeout(() => (this.messaggio = ''), 3000);
-        },
-        error: (err: HttpErrorResponse) => {
-          console.error('[COLLEZIONE] refresh post-DELETE fallito:', err);
-          this.loadErrorMsg = 'Rimozione fatta, ma non sono riuscito ad aggiornare la lista dal server.';
-          // manteniamo la lista già aggiornata (no rollback)
-        }
-      });
-    } catch (e: any) {
-      const err = e as HttpErrorResponse;
-      // rollback UI SOLO se errore “serio”
-      this.tuttiIFilm = snapshot;
-      this.applicaRicerca();
-
-      if (err?.status === 401 || err?.status === 403) {
-        this.noPermessiMsg = 'Operazione riservata. Effettua il login per continuare.';
-        return;
-      }
-      console.error('[COLLEZIONE] DELETE errore:', err);
-      this.loadErrorMsg = 'Errore durante la rimozione. Lista non aggiornata.';
-    }
   }
 
   private applicaOrdinamento(): void {
@@ -194,5 +177,65 @@ export class CollezioneComponent implements OnInit {
         this.film.sort((a, b) => b.anno - a.anno);
         break;
     }
+  }
+
+  // ---------- Rimozione: apre conferma o gate ----------
+  onClickRimuovi(f: Film): void {
+    this.noPermessiMsg = '';
+    this.selectedForDelete = f;
+
+    if (!this.loggedIn) {
+      // memorizza intento e mostra gate
+      this.pendingAfterLogin = { action: 'delete', film: f };
+      this.openLoginRequired();
+      return;
+    }
+    this.apriConfermaDelete();
+  }
+
+  private apriConfermaDelete(): void {
+    const el = document.getElementById('confirmDeleteModal');
+    if (el) new Modal(el).show();
+  }
+
+  annullaDelete(): void {
+    // basta chiudere, selectedForDelete resta o si può azzerare
+    const el = document.getElementById('confirmDeleteModal');
+    if (!el) return;
+    (Modal.getInstance(el) || new Modal(el)).hide();
+  }
+
+  confermaDelete(): void {
+    if (!this.selectedForDelete || this.isDeleting) return;
+    this.isDeleting = true;
+
+    const el = document.getElementById('confirmDeleteModal');
+    const modalInst = el ? (Modal.getInstance(el) || new Modal(el)) : null;
+
+    this.collezioneService.rimuoviFilm(this.selectedForDelete.id)
+      .then(() => {
+        // chiudi modale
+        modalInst?.hide();
+
+        // ricarica da backend; se fallisce non svuotiamo
+        this.caricaDaBackend();
+
+        this.messaggio = 'Film rimosso dalla collezione.';
+        setTimeout(() => this.messaggio = '', 3000);
+      })
+      .catch((e: HttpErrorResponse) => {
+        if (e?.status === 401 || e?.status === 403) {
+          // sessione assente/scaduta: chiedi login
+          this.pendingAfterLogin = { action: 'delete', film: this.selectedForDelete! };
+          modalInst?.hide();
+          this.openLoginRequired();
+          return;
+        }
+        console.error('Errore durante la rimozione:', e);
+        this.loadErrorMsg = 'Errore durante la rimozione. Lista non aggiornata.';
+      })
+      .finally(() => {
+        this.isDeleting = false;
+      });
   }
 }
