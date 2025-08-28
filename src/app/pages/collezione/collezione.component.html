@@ -47,16 +47,19 @@
 
     <div *ngIf="film.length > 0">
       <div *ngIf="vista === 'galleria'" class="row">
-        <div *ngFor="let f of film" class="col-md-3 mb-3">
-          <div class="card">
+        <div *ngFor="let f of film" class="col-6 col-md-4 col-lg-3 d-flex mb-3">
+          <div class="card h-100 d-flex flex-column">
             <img [src]="'https://image.tmdb.org/t/p/w300' + f.posterPath" class="card-img-top" *ngIf="f.posterPath" />
-            <div class="card-body">
+            <div class="card-body d-flex flex-column">
               <h5 class="card-title">{{ f.titolo }}</h5>
-              <p class="card-text">{{ f.anno }}</p>
-              <p><strong>Formato:</strong> {{ f.formato }}</p>
-              <p><strong>Custodia:</strong> {{ f.custodia }}</p>
-              <div class="d-grid gap-2 mt-auto">
-                <button class="btn btn-danger" (click)="onClickRimuovi(f)">Rimuovi</button>
+              <!-- Contenuto spinto in basso -->
+              <div class="mt-auto">
+                <p class="card-text">{{ f.anno }}</p>
+                <p><strong>Formato:</strong> {{ f.formato }}</p>
+                <p><strong>Custodia:</strong> {{ f.custodia }}</p>
+                <div class="d-grid gap-2 mt-2">
+                  <button class="btn btn-danger" (click)="onClickRimuovi(f)">Rimuovi</button>
+                </div>
               </div>
             </div>
           </div>
