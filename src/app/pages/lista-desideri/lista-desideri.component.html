@@ -1,4 +1,4 @@
-<div class="container mt-3">
+<div class="container">
   <div class="d-flex flex-column align-items-start">
     <h2>Lista dei desideri</h2>
 
@@ -25,10 +25,10 @@
       Nessun film trovato in wishlist con il filtro corrente.
     </div>
 
-    <!-- Griglia responsive con larghezze sane -->
-    <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 g-4 mt-2">
-      <div class="col" *ngFor="let f of listaDesideriFiltrata">
-        <div class="card h-100 shadow-sm wishlist-card">
+    <!-- Griglia responsive -->
+    <div class="row mt-3">
+      <div class="col-md-3 mb-3" *ngFor="let f of listaDesideriFiltrata">
+        <div class="card h-100 shadow-sm">
           <!-- Poster -->
           <img *ngIf="f.posterPath" [src]="'https://image.tmdb.org/t/p/w300' + f.posterPath" class="card-img-top"
             alt="{{ f.titolo }}" />
@@ -41,7 +41,7 @@
 
             <!-- Bottoni: dimensione standard, pieni, ben distanziati -->
             <div class="d-grid gap-2 mt-auto">
-              <button type="button" class="btn btn-success text-nowrap" (click)="onClickAggiungiAllaCollezione(f)">
+              <button type="button" class="btn btn-success" (click)="onClickAggiungiAllaCollezione(f)">
                 Aggiungi alla collezione
               </button>
               <button type="button" class="btn btn-danger text-nowrap" (click)="onClickElimina(f)">
@@ -52,9 +52,6 @@
         </div>
       </div>
     </div>
-
-
-
 
     <ng-template #emptyWishlist>
       <div class="alert alert-info mt-3" *ngIf="(listaDesideri?.length || 0) === 0">

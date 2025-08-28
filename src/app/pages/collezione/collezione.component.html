@@ -55,8 +55,9 @@
             <p class="card-text">{{ f.anno }}</p>
             <p><strong>Formato:</strong> {{ f.formato }}</p>
             <p><strong>Custodia:</strong> {{ f.custodia }}</p>
-
-            <button class="btn btn-danger btn-sm" (click)="onClickRimuovi(f)">Rimuovi</button>
+            <div class="d-grid gap-2 mt-auto">
+              <button class="btn btn-danger" (click)="onClickRimuovi(f)">Rimuovi</button>
+            </div>
           </div>
         </div>
       </div>
