@@ -10,16 +10,18 @@ import { AuthService } from '../../services/auth.service';
 import { Film } from '../../models/film.model';
 import { LoginModalComponent } from '../../components/login-modal/login-modal.component';
 import Modal from 'bootstrap/js/dist/modal';
+import { LogoutModalComponent } from '../../components/logout-modal/logout-modal.component';
 
 @Component({
   selector: 'app-collezione',
   templateUrl: './collezione.component.html',
   styleUrls: ['./collezione.component.scss'],
   standalone: true,
-  imports: [CommonModule, LoginModalComponent]
+  imports: [CommonModule, LoginModalComponent, LogoutModalComponent]
 })
 export class CollezioneComponent implements OnInit {
   @ViewChild('loginRef') loginModal!: LoginModalComponent;
+  @ViewChild('logoutRef') logoutModal!: LogoutModalComponent;
 
   tuttiIFilm: Film[] = [];
   film: Film[] = [];
@@ -117,8 +119,13 @@ export class CollezioneComponent implements OnInit {
   }
 
   onLogoutClick(): void {
+    this.logoutModal.open();
+  }
+
+  confermaLogout(): void {
     this.auth.logout();
-    alert('Hai effettuato il logout.');
+    this.messaggio = 'Hai effettuato il logout.';
+    setTimeout(() => this.messaggio = '', 3000);
   }
 
   // ---------- Data load ----------

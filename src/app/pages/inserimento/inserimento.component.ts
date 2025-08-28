@@ -12,16 +12,18 @@ import { ListaDesideriService } from '../../services/lista-desideri.service';
 import { AuthService } from '../../services/auth.service';
 
 import { Film } from '../../models/film.model';
+import { LogoutModalComponent } from '../../components/logout-modal/logout-modal.component';
 
 @Component({
   selector: 'app-inserimento',
   standalone: true,
-  imports: [CommonModule, FormsModule, LoginModalComponent],
+  imports: [CommonModule, FormsModule, LoginModalComponent, LogoutModalComponent],
   templateUrl: './inserimento.component.html',
   styleUrls: ['./inserimento.component.scss']
 })
 export class InserimentoComponent implements OnInit {
   @ViewChild('loginRef') loginModal!: LoginModalComponent;
+  @ViewChild('logoutRef') logoutModal!: LogoutModalComponent;
 
   film: any[] = [];
   ricercaEffettuata = false;
@@ -30,6 +32,7 @@ export class InserimentoComponent implements OnInit {
   custodiaSelezionata: Film['custodia'] | '' = '';
   filmGiaPresente = false;
   confermaSuccesso = false;
+  messaggio: string = '';
 
   // stato salvataggio
   isSaving = false;
@@ -119,8 +122,13 @@ export class InserimentoComponent implements OnInit {
   }
 
   onLogoutClick(): void {
-    this.auth.logout();
-    alert('Hai effettuato il logout.');
+    this.logoutModal.open();
+  }
+
+  confermaLogout(): void {
+    this.auth.logout?.();
+    this.messaggio = 'Hai effettuato il logout.';
+    setTimeout(() => this.messaggio = '', 3000);
   }
 
   caricaDettagliFilm(film: any): void {

@@ -11,16 +11,18 @@ import { AuthService } from '../../services/auth.service';
 import { Film } from '../../models/film.model';
 import { LoginModalComponent } from '../../components/login-modal/login-modal.component';
 import Modal from 'bootstrap/js/dist/modal';
+import { LogoutModalComponent } from '../../components/logout-modal/logout-modal.component';
 
 @Component({
   selector: 'app-lista-desideri',
   templateUrl: './lista-desideri.component.html',
   styleUrls: ['./lista-desideri.component.scss'],
   standalone: true,
-  imports: [CommonModule, LoginModalComponent]
+  imports: [CommonModule, LoginModalComponent, LogoutModalComponent]
 })
 export class ListaDesideriComponent implements OnInit {
   @ViewChild('loginRef') loginModal!: LoginModalComponent;
+  @ViewChild('logoutRef') logoutModal!: LogoutModalComponent;
 
   // Dati
   listaDesideri: Film[] = [];
@@ -28,6 +30,7 @@ export class ListaDesideriComponent implements OnInit {
 
   // Stato rete / auth
   isOnline: boolean = true;
+  messaggio: string = '';
   get loggedIn(): boolean { return this.auth.isLoggedIn(); }
   get username(): string | null { return this.auth.getLoggedUsername(); }
 
@@ -52,7 +55,7 @@ export class ListaDesideriComponent implements OnInit {
     private http: HttpClient,
     private ricercaService: RicercaService,
     public auth: AuthService
-  ) {}
+  ) { }
 
   ngOnInit(): void {
     // Stato rete + primi dati
@@ -145,8 +148,13 @@ export class ListaDesideriComponent implements OnInit {
   }
 
   onLogoutClick(): void {
-    this.auth.logout();
-    alert('Hai effettuato il logout.');
+    this.logoutModal.open();
+  }
+
+  confermaLogout(): void {
+    this.auth.logout?.();
+    this.messaggio = 'Hai effettuato il logout.';
+    setTimeout(() => this.messaggio = '', 3000);
   }
 
   // ---------- Click handlers ----------

@@ -1,0 +1,17 @@
+<div class="modal fade" [id]="modalId" tabindex="-1" [attr.aria-labelledby]="modalId + 'Label'" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 [id]="modalId + 'Label'" class="modal-title">Conferma Logout</h5>
+        <button type="button" class="btn-close" (click)="close()" aria-label="Chiudi"></button>
+      </div>
+      <div class="modal-body">
+        Sei sicuro di voler uscire?
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-outline-secondary" (click)="close()">Annulla</button>
+        <button class="btn btn-danger" (click)="confermaLogout()">Logout</button>
+      </div>
+    </div>
+  </div>
+</div>

@@ -130,4 +130,5 @@
 
   <!-- Login Modal -->
   <app-login-modal #loginRef (loggedIn)="onLoggedIn($event)"></app-login-modal>
+  <app-logout-modal #logoutRef [modalId]="'logoutModalCollezione'" (confermato)="confermaLogout()"></app-logout-modal>
 </div>

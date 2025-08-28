@@ -14,6 +14,10 @@
     </ng-template>
   </div>
 
+  <div *ngIf="messaggio" class="alert alert-success mt-2">
+    {{ messaggio }}
+  </div>
+
   <!-- Stato ricerca -->
   <div class="mt-2 small text-muted">
     Risultati: {{ film.length }}
@@ -61,7 +65,8 @@
   </div>
 
   <!-- Modale: conferma aggiunta -->
-  <div class="modal fade" id="confermaAggiuntaModal" tabindex="-1" aria-labelledby="confermaAggiuntaModalLabel" aria-hidden="true">
+  <div class="modal fade" id="confermaAggiuntaModal" tabindex="-1" aria-labelledby="confermaAggiuntaModalLabel"
+    aria-hidden="true">
     <div class="modal-dialog">
       <div class="modal-content">
 
@@ -138,4 +143,6 @@
 
   <!-- Login Modal -->
   <app-login-modal #loginRef (loggedIn)="onLoggedIn($event)"></app-login-modal>
+  <app-logout-modal #logoutRef [modalId]="'logoutModalInserimento'" (confermato)="confermaLogout()"></app-logout-modal>
+
 </div>
