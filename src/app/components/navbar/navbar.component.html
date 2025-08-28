@@ -47,15 +47,15 @@
         </form>
 
         <!-- Utente -->
-        <div class="d-flex align-items-center gap-2 me-auto mt-2 mb-lg-0">
+        <div class="d-flex align-items-center align-content-center gap-2 me-auto bottoneLoginOut">
           <ng-container *ngIf="!loggedIn; else loggedBlock">
-            <button class="btn btn-outline-primary btn-sm" (click)="apriLogin()">
+            <button class="btn btn-outline-primary" (click)="apriLogin()">
               Login
             </button>
           </ng-container>
           <ng-template #loggedBlock>
             <span class="text-secondary small" *ngIf="username">({{ username }})</span>
-            <button class="btn btn-outline-secondary btn-sm" (click)="apriLogout()">
+            <button class="btn btn-outline-secondary" (click)="apriLogout()">
               Logout
             </button>
           </ng-template>
