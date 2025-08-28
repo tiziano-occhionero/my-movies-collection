@@ -3,53 +3,63 @@
     <!-- Logo e titolo -->
     <a class="navbar-brand" routerLink="/collezione">MyMoviesCollection</a>
 
-    <!-- Navigazione tra pagine -->
-    <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-      <li class="nav-item">
-        <a class="nav-link" routerLink="/inserimento" routerLinkActive="active">Inserimento</a>
-      </li>
-      <li class="nav-item">
-        <a class="nav-link" routerLink="/collezione" routerLinkActive="active">Collezione</a>
-      </li>
-      <li class="nav-item">
-        <a class="nav-link" routerLink="/lista-desideri" routerLinkActive="active">Lista desideri</a>
-      </li>
-    </ul>
+    <!-- Toggler (mobile) -->
+    <button class="navbar-toggler" type="button"
+            data-bs-toggle="collapse" data-bs-target="#mainNavbar"
+            aria-controls="mainNavbar" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
 
-    <!-- Gruppo destra: ricerca + utente -->
-    <div class="d-flex ms-auto align-items-center gap-3">
-      <!-- Ricerca -->
-      <form (ngSubmit)="onSubmit()" class="d-flex align-items-center gap-2 mb-0" role="search">
-        <input
-          class="form-control"
-          type="search"
-          placeholder="Cerca film"
-          aria-label="Cerca"
-          [(ngModel)]="query"
-          name="query"
-          (keydown.enter)="onSubmit(); $event.preventDefault();" />
+    <!-- Contenuto collassabile -->
+    <div class="collapse navbar-collapse" id="mainNavbar">
+      <!-- Navigazione tra pagine -->
+      <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+        <li class="nav-item">
+          <a class="nav-link" routerLink="/inserimento" routerLinkActive="active">Inserimento</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" routerLink="/collezione" routerLinkActive="active">Collezione</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" routerLink="/lista-desideri" routerLinkActive="active">Lista desideri</a>
+        </li>
+      </ul>
 
-        <!-- Bottone Pulisci: appare solo se c'è testo -->
-        <button *ngIf="query" type="button" class="btn btn-outline-secondary" (click)="clearSearch()" aria-label="Pulisci ricerca">
-          Pulisci
-        </button>
+      <!-- Gruppo destra: ricerca + utente -->
+      <div class="d-lg-flex ms-auto align-items-center gap-3 mt-2 mt-lg-0">
+        <!-- Ricerca -->
+        <form (ngSubmit)="onSubmit()" class="d-flex align-items-center gap-2 mb-0" role="search">
+          <input
+            class="form-control"
+            type="search"
+            placeholder="Cerca film"
+            aria-label="Cerca"
+            [(ngModel)]="query"
+            name="query"
+            (keydown.enter)="onSubmit(); $event.preventDefault();" />
 
-        <button class="btn btn-outline-success" type="submit">Cerca</button>
-      </form>
-
-      <!-- Utente -->
-      <div class="d-flex align-items-center gap-2">
-        <ng-container *ngIf="!loggedIn; else loggedBlock">
-          <button class="btn btn-outline-primary btn-sm" (click)="apriLogin()">
-            Login
+          <!-- Bottone Pulisci: appare solo se c'è testo -->
+          <button *ngIf="query" type="button" class="btn btn-outline-secondary" (click)="clearSearch()" aria-label="Pulisci ricerca">
+            Pulisci
           </button>
-        </ng-container>
-        <ng-template #loggedBlock>
-          <span class="text-secondary small" *ngIf="username">({{ username }})</span>
-          <button class="btn btn-outline-secondary btn-sm" (click)="apriLogout()">
-            Logout
-          </button>
-        </ng-template>
+
+          <button class="btn btn-outline-success" type="submit">Cerca</button>
+        </form>
+
+        <!-- Utente -->
+        <div class="d-flex align-items-center gap-2 me-auto mt-2 mb-lg-0">
+          <ng-container *ngIf="!loggedIn; else loggedBlock">
+            <button class="btn btn-outline-primary btn-sm" (click)="apriLogin()">
+              Login
+            </button>
+          </ng-container>
+          <ng-template #loggedBlock>
+            <span class="text-secondary small" *ngIf="username">({{ username }})</span>
+            <button class="btn btn-outline-secondary btn-sm" (click)="apriLogout()">
+              Logout
+            </button>
+          </ng-template>
+        </div>
       </div>
     </div>
   </div>
@@ -57,9 +67,4 @@
 
 <!-- Modali gestiti dalla navbar -->
 <app-login-modal #loginRef (loggedIn)="onLoggedIn($event)"></app-login-modal>
-
-<app-logout-modal
-  #logoutRef
-  [modalId]="'logoutModalNavbar'"
-  (confermato)="confermaLogout()">
-</app-logout-modal>
+<app-logout-modal #logoutRef [modalId]="'logoutModalNavbar'" (confermato)="confermaLogout()"></app-logout-modal>
