@@ -1,148 +1,139 @@
 <div class="container">
-  <div class="d-flex align-items-center justify-content-between">
+  <div class="d-flex flex-column align-items-start">
     <h2>Inserimento Film</h2>
 
-    <!-- Toggle Login/Logout -->
-    <button *ngIf="!loggedIn; else logoutBtn" class="btn btn-outline-primary btn-sm" (click)="procediAlLogin()">
-      Login
-    </button>
-    <ng-template #logoutBtn>
-      <div class="d-flex align-items-center gap-2">
-        <span class="text-muted small" *ngIf="auth.getLoggedUsername()">({{ auth.getLoggedUsername() }})</span>
-        <button class="btn btn-outline-secondary btn-sm" (click)="onLogoutClick()">Logout</button>
-      </div>
-    </ng-template>
-  </div>
+    <div *ngIf="messaggio" class="alert alert-success mt-2">
+      {{ messaggio }}
+    </div>
 
-  <div *ngIf="messaggio" class="alert alert-success mt-2">
-    {{ messaggio }}
-  </div>
+    <!-- Stato ricerca -->
+    <div class="mt-2 small text-muted">
+      Risultati: {{ film.length }}
+    </div>
 
-  <!-- Stato ricerca -->
-  <div class="mt-2 small text-muted">
-    Risultati: {{ film.length }}
-  </div>
+    <!-- Nessun risultato -->
+    <div *ngIf="film.length === 0 && ricercaEffettuata" class="alert alert-warning mt-3">
+      Nessun film trovato.
+    </div>
 
-  <!-- Nessun risultato -->
-  <div *ngIf="film.length === 0 && ricercaEffettuata" class="alert alert-warning mt-3">
-    Nessun film trovato.
-  </div>
+    <!-- Risultati -->
+    <div *ngIf="film.length > 0" class="row mt-3" id="accordion-container">
+      <div *ngFor="let f of film; let i = index" class="col-md-3 mb-3">
+        <div class="card h-100 shadow-sm">
+          <img *ngIf="f.poster_path" [src]="'https://image.tmdb.org/t/p/w500' + f.poster_path" class="card-img-top"
+            [alt]="f.title || 'Poster'" />
+          <div class="card-body d-flex flex-column">
+            <h5 class="card-title mb-1">{{ f.title }}</h5>
+            <p class="card-text"><strong>Anno:</strong> {{ f.release_date | date:'yyyy' }}</p>
 
-  <!-- Risultati -->
-  <div *ngIf="film.length > 0" class="row mt-3" id="accordion-container">
-    <div *ngFor="let f of film; let i = index" class="col-md-6 col-lg-4 mb-4">
-      <div class="card h-100 shadow-sm">
-        <img *ngIf="f.poster_path" [src]="'https://image.tmdb.org/t/p/w500' + f.poster_path" class="card-img-top"
-          [alt]="f.title || 'Poster'" />
-        <div class="card-body d-flex flex-column">
-          <h5 class="card-title mb-1">{{ f.title }}</h5>
-          <p class="card-text"><strong>Anno:</strong> {{ f.release_date | date:'yyyy' }}</p>
-
-          <!-- Dettagli -->
-          <div class="accordion mb-3">
-            <div class="accordion-item border-0">
-              <h2 class="accordion-header">
-                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
-                  [attr.data-bs-target]="'#collapse-' + f.id" aria-expanded="false"
-                  [attr.aria-controls]="'collapse-' + f.id" (click)="caricaDettagliFilm(f)">
-                  Dettagli
-                </button>
-              </h2>
-              <div [id]="'collapse-' + f.id" class="accordion-collapse collapse" data-bs-parent="#accordion-container">
-                <div class="accordion-body bg-white border rounded shadow p-3">
-                  <p class="mb-1"><strong>Genere:</strong> {{ f.genre_names?.join(', ') || 'N/A' }}</p>
-                  <p class="mb-1"><strong>Regista:</strong> {{ f.regista || 'N/A' }}</p>
-                  <p class="mb-0"><strong>Attori principali:</strong> {{ f.attori?.join(', ') || 'N/A' }}</p>
+            <!-- Dettagli -->
+            <div class="accordion mb-3">
+              <div class="accordion-item border-0">
+                <h2 class="accordion-header">
+                  <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                    [attr.data-bs-target]="'#collapse-' + f.id" aria-expanded="false"
+                    [attr.aria-controls]="'collapse-' + f.id" (click)="caricaDettagliFilm(f)">
+                    Dettagli
+                  </button>
+                </h2>
+                <div [id]="'collapse-' + f.id" class="accordion-collapse collapse"
+                  data-bs-parent="#accordion-container">
+                  <div class="accordion-body bg-white border rounded shadow p-3">
+                    <p class="mb-1"><strong>Genere:</strong> {{ f.genre_names?.join(', ') || 'N/A' }}</p>
+                    <p class="mb-1"><strong>Regista:</strong> {{ f.regista || 'N/A' }}</p>
+                    <p class="mb-0"><strong>Attori principali:</strong> {{ f.attori?.join(', ') || 'N/A' }}</p>
+                  </div>
                 </div>
               </div>
             </div>
-          </div>
 
-          <button class="btn btn-success mt-auto" (click)="apriModale(f)">Aggiungi alla collezione</button>
+            <button class="btn btn-success mt-auto" (click)="apriModale(f)">Aggiungi alla collezione</button>
+          </div>
         </div>
       </div>
     </div>
-  </div>
 
-  <!-- Modale: conferma aggiunta -->
-  <div class="modal fade" id="confermaAggiuntaModal" tabindex="-1" aria-labelledby="confermaAggiuntaModalLabel"
-    aria-hidden="true">
-    <div class="modal-dialog">
-      <div class="modal-content">
+    <!-- Modale: conferma aggiunta -->
+    <div class="modal fade" id="confermaAggiuntaModal" tabindex="-1" aria-labelledby="confermaAggiuntaModalLabel"
+      aria-hidden="true">
+      <div class="modal-dialog">
+        <div class="modal-content">
 
-        <div class="modal-body">
-          <div class="mb-3">
-            <label for="formato" class="form-label">Formato</label>
-            <select id="formato" class="form-select" [(ngModel)]="formatoSelezionato">
-              <option value="" disabled selected>Seleziona formato</option>
-              <option value="uhdbd">UltraHd Blu-ray</option>
-              <option value="bd">Blu-ray</option>
-              <option value="dvd">DVD</option>
-              <option value="vhs">VHS</option>
-              <option value="altro">Altro</option>
-            </select>
+          <div class="modal-body">
+            <div class="mb-3">
+              <label for="formato" class="form-label">Formato</label>
+              <select id="formato" class="form-select" [(ngModel)]="formatoSelezionato">
+                <option value="" disabled selected>Seleziona formato</option>
+                <option value="uhdbd">UltraHd Blu-ray</option>
+                <option value="bd">Blu-ray</option>
+                <option value="dvd">DVD</option>
+                <option value="vhs">VHS</option>
+                <option value="altro">Altro</option>
+              </select>
+            </div>
+
+            <div class="mb-3">
+              <label for="custodia" class="form-label">Tipo di custodia</label>
+              <select id="custodia" class="form-select" [(ngModel)]="custodiaSelezionata">
+                <option value="" disabled selected>Seleziona custodia</option>
+                <option value="standard">Standard</option>
+                <option value="steelbook">Steelbook</option>
+                <option value="slipcase">Slipcase</option>
+                <option value="sJewelBox">Super Jewel Box</option>
+                <option value="cofanetto">Cofanetto</option>
+                <option value="snapper">Snapper</option>
+                <option value="altro">Altro</option>
+              </select>
+            </div>
+
+            <div *ngIf="confermaSuccesso" class="alert alert-success mt-3">
+              Film aggiunto con successo!
+            </div>
+
+            <div *ngIf="filmGiaPresente" class="alert alert-warning mt-3">
+              Il film è già presente nella collezione o nella wishlist.
+            </div>
           </div>
 
-          <div class="mb-3">
-            <label for="custodia" class="form-label">Tipo di custodia</label>
-            <select id="custodia" class="form-select" [(ngModel)]="custodiaSelezionata">
-              <option value="" disabled selected>Seleziona custodia</option>
-              <option value="standard">Standard</option>
-              <option value="steelbook">Steelbook</option>
-              <option value="slipcase">Slipcase</option>
-              <option value="sJewelBox">Super Jewel Box</option>
-              <option value="cofanetto">Cofanetto</option>
-              <option value="snapper">Snapper</option>
-              <option value="altro">Altro</option>
-            </select>
+          <div class="modal-footer">
+            <button class="btn btn-primary" [disabled]="!formatoSelezionato || !custodiaSelezionata || confermaSuccesso"
+              (click)="confermaAggiunta()">
+              Conferma
+            </button>
+            <button class="btn btn-outline-secondary flex-fill"
+              [disabled]="!formatoSelezionato || !custodiaSelezionata || confermaSuccesso"
+              (click)="aggiungiAllaListaDesideri()">
+              Aggiungi alla lista desideri
+            </button>
           </div>
 
-          <div *ngIf="confermaSuccesso" class="alert alert-success mt-3">
-            Film aggiunto con successo!
-          </div>
-
-          <div *ngIf="filmGiaPresente" class="alert alert-warning mt-3">
-            Il film è già presente nella collezione o nella wishlist.
-          </div>
-        </div>
-
-        <div class="modal-footer">
-          <button class="btn btn-primary" [disabled]="!formatoSelezionato || !custodiaSelezionata || confermaSuccesso"
-            (click)="confermaAggiunta()">
-            Conferma
-          </button>
-          <button class="btn btn-outline-secondary flex-fill"
-            [disabled]="!formatoSelezionato || !custodiaSelezionata || confermaSuccesso"
-            (click)="aggiungiAllaListaDesideri()">
-            Aggiungi alla lista desideri
-          </button>
-        </div>
-
-      </div>
-    </div>
-  </div>
-
-  <!-- Modale: ACCESSO RICHIESTO (unico, niente duplicati) -->
-  <div class="modal fade" id="loginRequiredModal" tabindex="-1" aria-labelledby="loginRequiredLabel" aria-hidden="true">
-    <div class="modal-dialog">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h5 id="loginRequiredLabel" class="modal-title">Accesso richiesto</h5>
-          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Chiudi"></button>
-        </div>
-        <div class="modal-body">
-          Per aggiungere film alla tua collezione devi effettuare l’accesso.
-        </div>
-        <div class="modal-footer">
-          <button class="btn btn-outline-secondary" data-bs-dismiss="modal">Annulla</button>
-          <button class="btn btn-primary" (click)="procediAlLogin()">Accedi</button>
         </div>
       </div>
     </div>
+
+    <!-- Modale: ACCESSO RICHIESTO (unico, niente duplicati) -->
+    <div class="modal fade" id="loginRequiredModal" tabindex="-1" aria-labelledby="loginRequiredLabel"
+      aria-hidden="true">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 id="loginRequiredLabel" class="modal-title">Accesso richiesto</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Chiudi"></button>
+          </div>
+          <div class="modal-body">
+            Per aggiungere film alla tua collezione devi effettuare l’accesso.
+          </div>
+          <div class="modal-footer">
+            <button class="btn btn-outline-secondary" data-bs-dismiss="modal">Annulla</button>
+            <button class="btn btn-primary" (click)="procediAlLogin()">Accedi</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Login Modal -->
+    <app-login-modal #loginRef (loggedIn)="onLoggedIn($event)"></app-login-modal>
+    <app-logout-modal #logoutRef [modalId]="'logoutModalInserimento'"
+      (confermato)="confermaLogout()"></app-logout-modal>
+
   </div>
-
-  <!-- Login Modal -->
-  <app-login-modal #loginRef (loggedIn)="onLoggedIn($event)"></app-login-modal>
-  <app-logout-modal #logoutRef [modalId]="'logoutModalInserimento'" (confermato)="confermaLogout()"></app-logout-modal>
-
-</div>

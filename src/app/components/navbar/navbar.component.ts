@@ -1,26 +1,35 @@
-import { Component } from '@angular/core';
+import { Component, ViewChild } from '@angular/core';
 import { Router, RouterModule, NavigationEnd } from '@angular/router';
 import { FormsModule } from '@angular/forms';
-import { CommonModule } from '@angular/common'; // ⬅️ serve per *ngIf
+import { CommonModule } from '@angular/common';
 import { filter } from 'rxjs/operators';
 
 import { RicercaService } from '../../services/ricerca.service';
 import { TmdbService } from '../../services/tmdb.service';
+import { AuthService } from '../../services/auth.service';
+
+import { LoginModalComponent } from '../login-modal/login-modal.component';
+import { LogoutModalComponent } from '../logout-modal/logout-modal.component';
 
 @Component({
   selector: 'app-navbar',
   standalone: true,
-  imports: [RouterModule, FormsModule, CommonModule], // ⬅️ aggiunto CommonModule
+  imports: [RouterModule, FormsModule, CommonModule, LoginModalComponent, LogoutModalComponent],
   templateUrl: './navbar.component.html',
   styleUrls: ['./navbar.component.scss']
 })
 export class NavbarComponent {
   query = '';
 
+  // Modali gestite dalla navbar
+  @ViewChild('loginRef') loginModal!: LoginModalComponent;
+  @ViewChild('logoutRef') logoutModal!: LogoutModalComponent;
+
   constructor(
     private router: Router,
     private ricercaService: RicercaService,
-    private tmdbService: TmdbService
+    private tmdbService: TmdbService,
+    public auth: AuthService
   ) {
     // svuota solo l’INPUT ad ogni cambio rotta (i filtri restano dove applicati)
     this.router.events.pipe(filter(e => e instanceof NavigationEnd)).subscribe(() => {
@@ -28,12 +37,17 @@ export class NavbarComponent {
     });
   }
 
+  // stato auth per la UI
+  get loggedIn(): boolean { return this.auth.isLoggedIn(); }
+  get username(): string | null { return this.auth.getLoggedUsername(); }
+
+  // ---- Ricerca ----
   onSubmit() {
     const q = (this.query || '').trim();
     const url = this.router.url;
 
     if (!q) {
-      this.clearSearch(); // usa la stessa logica della X
+      this.clearSearch();
       return;
     }
 
@@ -63,7 +77,6 @@ export class NavbarComponent {
     }
   }
 
-  // ✕ pulisce l’input e il filtro GIUSTO per la pagina corrente
   clearSearch() {
     this.query = '';
     const url = this.router.url;
@@ -80,6 +93,24 @@ export class NavbarComponent {
     }
   }
 
+  // ---- Login/Logout gestiti dalla navbar ----
+  apriLogin(): void {
+    this.loginModal?.open();
+  }
+  onLoggedIn(e: { username: string; password: string }) {
+    this.auth.login(e.username, e.password);
+    this.loginModal?.close?.();
+  }
+
+  apriLogout(): void {
+    this.logoutModal?.open();
+  }
+  confermaLogout(): void {
+    this.auth.logout?.();
+    // nessun alert qui: gli avvisi eventuali restano nelle pagine
+  }
+
+  // helper eventuali
   isInserimentoPage(): boolean { return this.router.url.includes('inserimento'); }
   isCercaPage(): boolean { return this.router.url.includes('cerca'); }
 }

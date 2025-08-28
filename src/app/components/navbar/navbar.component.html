@@ -11,25 +11,55 @@
       <li class="nav-item">
         <a class="nav-link" routerLink="/collezione" routerLinkActive="active">Collezione</a>
       </li>
-      <li>
+      <li class="nav-item">
         <a class="nav-link" routerLink="/lista-desideri" routerLinkActive="active">Lista desideri</a>
       </li>
     </ul>
 
-    <form (ngSubmit)="onSubmit()" class="d-flex ms-auto align-items-center gap-2" role="search">
-      <input class="form-control" type="search" placeholder="Cerca film" aria-label="Cerca" [(ngModel)]="query"
-        name="query" (keydown.enter)="onSubmit(); $event.preventDefault();" />
+    <!-- Gruppo destra: ricerca + utente -->
+    <div class="d-flex ms-auto align-items-center gap-3">
+      <!-- Ricerca -->
+      <form (ngSubmit)="onSubmit()" class="d-flex align-items-center gap-2 mb-0" role="search">
+        <input
+          class="form-control"
+          type="search"
+          placeholder="Cerca film"
+          aria-label="Cerca"
+          [(ngModel)]="query"
+          name="query"
+          (keydown.enter)="onSubmit(); $event.preventDefault();" />
 
-      <!-- Bottone Pulisci: appare solo se c'è testo -->
-      <button *ngIf="query" type="button" class="btn btn-outline-secondary" (click)="clearSearch()"
-        aria-label="Pulisci ricerca">
-        Pulisci
-      </button>
+        <!-- Bottone Pulisci: appare solo se c'è testo -->
+        <button *ngIf="query" type="button" class="btn btn-outline-secondary" (click)="clearSearch()" aria-label="Pulisci ricerca">
+          Pulisci
+        </button>
 
-      <button class="btn btn-outline-success" type="submit">Cerca</button>
-    </form>
+        <button class="btn btn-outline-success" type="submit">Cerca</button>
+      </form>
 
-
-
+      <!-- Utente -->
+      <div class="d-flex align-items-center gap-2">
+        <ng-container *ngIf="!loggedIn; else loggedBlock">
+          <button class="btn btn-outline-primary btn-sm" (click)="apriLogin()">
+            Login
+          </button>
+        </ng-container>
+        <ng-template #loggedBlock>
+          <span class="text-secondary small" *ngIf="username">({{ username }})</span>
+          <button class="btn btn-outline-secondary btn-sm" (click)="apriLogout()">
+            Logout
+          </button>
+        </ng-template>
+      </div>
+    </div>
   </div>
 </nav>
+
+<!-- Modali gestiti dalla navbar -->
+<app-login-modal #loginRef (loggedIn)="onLoggedIn($event)"></app-login-modal>
+
+<app-logout-modal
+  #logoutRef
+  [modalId]="'logoutModalNavbar'"
+  (confermato)="confermaLogout()">
+</app-logout-modal>

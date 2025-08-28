@@ -121,9 +121,10 @@ export class InserimentoComponent implements OnInit {
     }
   }
 
+  /*
   onLogoutClick(): void {
     this.logoutModal.open();
-  }
+  }*/
 
   confermaLogout(): void {
     this.auth.logout?.();

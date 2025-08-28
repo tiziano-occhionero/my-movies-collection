@@ -147,9 +147,10 @@ export class ListaDesideriComponent implements OnInit {
     }
   }
 
+  /*
   onLogoutClick(): void {
     this.logoutModal.open();
-  }
+  }*/
 
   confermaLogout(): void {
     this.auth.logout?.();

@@ -1,0 +1,9 @@
+/* evita card troppo strette: */
+.wishlist-card {
+  min-width: 260px; /* puoi alzare a 280 se vuoi ancora più respiro */
+}
+
+/* taglio pulito del poster */
+.card-img-top {
+  object-fit: cover;
+}

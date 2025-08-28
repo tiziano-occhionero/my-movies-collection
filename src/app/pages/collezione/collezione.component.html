@@ -1,19 +1,7 @@
 <div class="container mt-3">
 
-  <div class="d-flex align-items-center justify-content-between">
+  <div class="d-flex flex-column align-items-start">
     <h2>Risultati ricerca nella collezione</h2>
-
-    <!-- Toggle Login/Logout -->
-    <button *ngIf="!loggedIn; else logoutBtn" class="btn btn-outline-primary btn-sm" (click)="procediAlLogin()">
-      Login
-    </button>
-    <ng-template #logoutBtn>
-      <div class="d-flex align-items-center gap-2">
-        <span class="text-muted small" *ngIf="username">({{ username }})</span>
-        <button class="btn btn-outline-secondary btn-sm" (click)="onLogoutClick()">Logout</button>
-      </div>
-    </ng-template>
-  </div>
 
   <!-- Avvisi caricamento e azioni -->
   <div *ngIf="messaggio" class="alert alert-success mt-2">
