@@ -1,4 +1,4 @@
-import { Component, ViewChild } from '@angular/core';
+import { Component, ViewChild, HostListener } from '@angular/core';
 import { Router, RouterModule, NavigationEnd } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
@@ -20,6 +20,8 @@ import { LogoutModalComponent } from '../logout-modal/logout-modal.component';
 })
 export class NavbarComponent {
   query = '';
+  private lastScrollTop = 0;
+  isHidden = false;
 
   // Modali gestite dalla navbar
   @ViewChild('loginRef') loginModal!: LoginModalComponent;
@@ -113,4 +115,20 @@ export class NavbarComponent {
   // helper eventuali
   isInserimentoPage(): boolean { return this.router.url.includes('inserimento'); }
   isCercaPage(): boolean { return this.router.url.includes('cerca'); }
+
+  @HostListener('window:scroll', [])
+  onWindowScroll() {
+    const currentScroll = window.scrollY || document.documentElement.scrollTop;
+
+    if (currentScroll > this.lastScrollTop && currentScroll > 50) {
+      // Scroll verso il basso → nascondi
+      this.isHidden = true;
+    } else {
+      // Scroll verso l'alto → mostra
+      this.isHidden = false;
+    }
+
+    this.lastScrollTop = currentScroll <= 0 ? 0 : currentScroll;
+  }
+
 }
