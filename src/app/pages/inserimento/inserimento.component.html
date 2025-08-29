@@ -19,40 +19,47 @@
     <!-- Risultati -->
     <div *ngIf="film.length > 0" class="row mt-3" id="accordion-container">
       <div *ngFor="let f of film; let i = index" class="col-6 col-md-4 col-lg-3 d-flex mb-3">
-        <div class="card h-100 shadow-sm">
+        <div class="card h-100 shadow-sm w-100">
           <img *ngIf="f.poster_path" [src]="'https://image.tmdb.org/t/p/w500' + f.poster_path" class="card-img-top"
             [alt]="f.title || 'Poster'" />
+
           <div class="card-body d-flex flex-column">
-            <h5 class="card-title mb-1">{{ f.title }}</h5>
-            <p class="card-text"><strong>Anno:</strong> {{ f.release_date | date:'yyyy' }}</p>
+            <h5 class="card-title mb-2">{{ f.title }}</h5>
 
-            <!-- Dettagli -->
-            <div class="accordion mb-3 position-relative">
-              <div class="accordion-item border-0">
-                <h2 class="accordion-header">
-                  <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
-                    [attr.data-bs-target]="'#overlay-' + f.id" aria-expanded="false"
-                    [attr.aria-controls]="'overlay-' + f.id" (click)="caricaDettagliFilm(f)">
-                    Dettagli
-                  </button>
-                </h2>
+            <!-- TUTTO questo blocco resta in fondo alla card -->
+            <div class="mt-auto">
+              <p class="card-text mb-2">
+                <strong>Anno:</strong> {{ f.release_date | date:'yyyy' }}
+              </p>
 
-                <!-- Overlay assoluto: non altera l’altezza della card -->
-                <div [id]="'overlay-' + f.id"
-                  class="accordion-collapse collapse position-absolute start-0 top-100 mt-1 w-100"
-                  style="z-index:1050;"
-                  data-bs-parent="#accordion-container">
-                  <div class="accordion-body bg-white border rounded shadow p-3">
-                    <p class="mb-1"><strong>Genere:</strong> {{ f.genre_names?.join(', ') || 'N/A' }}</p>
-                    <p class="mb-1"><strong>Regista:</strong> {{ f.regista || 'N/A' }}</p>
-                    <p class="mb-0"><strong>Attori principali:</strong> {{ f.attori?.join(', ') || 'N/A' }}</p>
+              <!-- Dettagli (overlay, non espande la card) -->
+              <div class="accordion position-relative mb-2">
+                <div class="accordion-item border-0">
+                  <h2 class="accordion-header">
+                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                      [attr.data-bs-target]="'#overlay-' + f.id" aria-expanded="false"
+                      [attr.aria-controls]="'overlay-' + f.id" (click)="caricaDettagliFilm(f)">
+                      Dettagli
+                    </button>
+                  </h2>
+
+                  <!-- Overlay assoluto -->
+                  <div [id]="'overlay-' + f.id"
+                    class="accordion-collapse collapse position-absolute start-0 top-100 mt-1 w-100"
+                    data-bs-parent="#accordion-container" style="z-index:1050;">
+                    <div class="accordion-body bg-white border rounded shadow p-3">
+                      <p class="mb-1"><strong>Genere:</strong> {{ f.genre_names?.join(', ') || 'N/A' }}</p>
+                      <p class="mb-1"><strong>Regista:</strong> {{ f.regista || 'N/A' }}</p>
+                      <p class="mb-0"><strong>Attori principali:</strong> {{ f.attori?.join(', ') || 'N/A' }}</p>
+                    </div>
                   </div>
                 </div>
               </div>
+
+              <button class="btn btn-success w-100" (click)="apriModale(f)">
+                Aggiungi alla collezione
+              </button>
             </div>
-
-
-            <button class="btn btn-success mt-auto" (click)="apriModale(f)">Aggiungi alla collezione</button>
           </div>
         </div>
       </div>
