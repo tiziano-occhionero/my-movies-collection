@@ -44,7 +44,14 @@
       Nessun film trovato per "{{ query }}".
     </div>
 
-    <div *ngIf="film.length > 0">
+    <!-- Spinner di caricamento -->
+    <div *ngIf="isLoading" class="d-flex justify-content-center align-items-center my-4">
+      <div class="spinner-border text-primary" role="status">
+        <span class="visually-hidden">Caricamento...</span>
+      </div>
+    </div>
+
+    <div *ngIf="!isLoading && film.length > 0">
       <div *ngIf="vista === 'galleria'" class="row">
         <div *ngFor="let f of film" class="col-6 col-md-4 col-lg-3 d-flex mb-3">
           <div class="card h-100 d-flex flex-column">

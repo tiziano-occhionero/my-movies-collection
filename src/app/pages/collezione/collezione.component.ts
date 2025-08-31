@@ -31,6 +31,7 @@ export class CollezioneComponent implements OnInit {
   messaggio: string = '';
   isOnline: boolean = true;
   queryCorrente: string = '';
+  isLoading = false;
 
   // avvisi
   noPermessiMsg: string = '';
@@ -118,11 +119,6 @@ export class CollezioneComponent implements OnInit {
     }
   }
 
-  /*
-  onLogoutClick(): void {
-    this.logoutModal.open();
-  }*/
-
   confermaLogout(): void {
     this.auth.logout();
     this.messaggio = 'Hai effettuato il logout.';
@@ -131,6 +127,7 @@ export class CollezioneComponent implements OnInit {
 
   // ---------- Data load ----------
   private caricaDaBackend(): void {
+    this.isLoading = true; // avvia lo spinner
     const snapshot = [...this.tuttiIFilm];
     this.loadErrorMsg = '';
 
@@ -147,6 +144,9 @@ export class CollezioneComponent implements OnInit {
         this.film = [...this.tuttiIFilm];
         this.applicaRicerca();
         this.loadErrorMsg = `Impossibile aggiornare dalla rete (status ${err.status || 'n/d'}). Mostro i dati già caricati.`;
+      },
+      complete: () => {
+        this.isLoading = false; // ferma lo spinner
       }
     });
   }
