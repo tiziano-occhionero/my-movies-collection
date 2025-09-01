@@ -152,7 +152,7 @@ export class CollezioneComponent implements OnInit {
   }
 
   private caricaDaLocale(): void {
-    // se in futuro vuoi davvero locale, reintroduci getCollezione(); ora carichiamo solo da backend/snapshot
+    this.tuttiIFilm = this.collezioneService.getCollezione();
     this.film = [...this.tuttiIFilm];
     this.applicaRicerca();
   }

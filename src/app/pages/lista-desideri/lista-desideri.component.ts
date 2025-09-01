@@ -98,8 +98,7 @@ export class ListaDesideriComponent implements OnInit {
   }
 
   private caricaDaLocale(): void {
-    const data = localStorage.getItem('listaDesideri');
-    this.listaDesideri = data ? JSON.parse(data) : [];
+    this.listaDesideri = this.listaDesideriService.getLocal();
     this.applicaFiltro();
   }
 
