@@ -197,14 +197,27 @@ export class CollezioneComponent implements OnInit {
   // ---------- Rimozione ----------
   onClickRimuovi(f: Film): void {
     this.noPermessiMsg = '';
+
+    // ❌ Offline: blocca e mostra modale informativo
+    if (!this.isOnline) {
+      this.openOfflineModal();
+      return;
+    }
+
     this.selectedForDelete = f;
 
     if (!this.loggedIn) {
+      // memorizza intento e mostra gate
       this.pendingAfterLogin = { action: 'delete', film: f };
       this.openLoginRequired();
       return;
     }
     this.apriConfermaDelete();
+  }
+
+  private openOfflineModal(): void {
+    const el = document.getElementById('offlineActionModal');
+    if (el) new Modal(el).show();
   }
 
   private apriConfermaDelete(): void {

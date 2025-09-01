@@ -90,7 +90,8 @@
     </div>
 
     <!-- Modale: ACCESSO RICHIESTO (gate) -->
-    <div class="modal fade" id="loginRequiredModal" tabindex="-1" aria-labelledby="loginRequiredLabel" aria-hidden="true">
+    <div class="modal fade" id="loginRequiredModal" tabindex="-1" aria-labelledby="loginRequiredLabel"
+      aria-hidden="true">
       <div class="modal-dialog">
         <div class="modal-content">
           <div class="modal-header">
@@ -108,8 +109,29 @@
       </div>
     </div>
 
+    <!-- Modale: OPERAZIONE NON DISPONIBILE OFFLINE -->
+    <div class="modal fade" id="offlineActionModal" tabindex="-1" aria-labelledby="offlineActionLabel"
+      aria-hidden="true">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 id="offlineActionLabel" class="modal-title">Operazione non disponibile</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Chiudi"></button>
+          </div>
+          <div class="modal-body">
+            Questa operazione non è disponibile in modalità offline. Riconnettiti a Internet per rimuovere i film dalla
+            collezione.
+          </div>
+          <div class="modal-footer">
+            <button class="btn btn-primary" data-bs-dismiss="modal">Ok</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <!-- Modale: CONFERMA RIMOZIONE -->
-    <div class="modal fade" id="confirmDeleteModal" tabindex="-1" aria-labelledby="confirmDeleteLabel" aria-hidden="true">
+    <div class="modal fade" id="confirmDeleteModal" tabindex="-1" aria-labelledby="confirmDeleteLabel"
+      aria-hidden="true">
       <div class="modal-dialog">
         <div class="modal-content">
           <div class="modal-header">
