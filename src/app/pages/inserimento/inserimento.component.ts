@@ -13,6 +13,7 @@ import { AuthService } from '../../services/auth.service';
 
 import { Film } from '../../models/film.model';
 import { LogoutModalComponent } from '../../components/logout-modal/logout-modal.component';
+import { NetworkService } from '../../services/network.service';
 
 @Component({
   selector: 'app-inserimento',
@@ -33,6 +34,7 @@ export class InserimentoComponent implements OnInit {
   filmGiaPresente = false;
   confermaSuccesso = false;
   messaggio: string = '';
+  isOnline: boolean = true;
 
   // stato salvataggio
   isSaving = false;
@@ -49,12 +51,21 @@ export class InserimentoComponent implements OnInit {
     private tmdbService: TmdbService,
     private listaDesideriService: ListaDesideriService,
     public auth: AuthService,
+    private networkService: NetworkService,
   ) { }
 
   ngOnInit(): void {
+    // Stato rete
+    this.networkService.isOnline().subscribe((isOnline: boolean) => {
+      this.isOnline = isOnline;
+    });
+
+    // Risultati ricerca film
     this.ricercaService.risultatiApi$.subscribe((risultati) => {
       this.film = risultati;
     });
+
+    // Stato ricerca effettuata
     this.ricercaService.ricercaApiEffettuata$.subscribe((val) => {
       this.ricercaEffettuata = val;
     });

@@ -2,6 +2,11 @@
   <div class="d-flex flex-column">
     <h2>Inserimento Film</h2>
 
+    <!-- Alert modalità offline -->
+    <div *ngIf="!isOnline" class="alert alert-warning mt-2">
+      Modalità offline: inserimento, rimozione e modifiche non sono disponibili.
+    </div>
+
     <div *ngIf="messaggio" class="alert alert-success mt-2">
       {{ messaggio }}
     </div>
