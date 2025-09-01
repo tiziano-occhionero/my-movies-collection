@@ -17,8 +17,13 @@
     </div>
 
     <!-- Nessun risultato -->
-    <div *ngIf="film.length === 0 && ricercaEffettuata" class="alert alert-warning mt-3">
+    <div *ngIf="film.length === 0 && ricercaEffettuata && isOnline" class="alert alert-warning mt-3">
       Nessun film trovato.
+    </div>
+
+    <!-- Ricerca offline -->
+    <div *ngIf="!isOnline && ricercaEffettuata" class="alert alert-warning mt-2">
+      Sei offline, non puoi effettuare ricerche"
     </div>
 
     <!-- Risultati -->
