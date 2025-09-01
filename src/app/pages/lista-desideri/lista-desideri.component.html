@@ -121,5 +121,24 @@
     <!-- Login Modal -->
     <app-login-modal #loginRef (loggedIn)="onLoggedIn($event)"></app-login-modal>
     <app-logout-modal #logoutRef [modalId]="'logoutModalWishlist'" (confermato)="confermaLogout()"></app-logout-modal>
+    <!-- Modale: OPERAZIONE NON DISPONIBILE OFFLINE -->
+    <div class="modal fade" id="offlineOperationModal" tabindex="-1" aria-labelledby="offlineOperationLabel"
+      aria-hidden="true">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 id="offlineOperationLabel" class="modal-title text-danger">Operazione non disponibile</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Chiudi"></button>
+          </div>
+          <div class="modal-body">
+            Sei offline: Questa operazione non è disponibile. Riconnettiti a Internet per rimuovere i film dalla
+            collezione.
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Chiudi</button>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 </div>

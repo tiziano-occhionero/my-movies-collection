@@ -146,11 +146,6 @@ export class ListaDesideriComponent implements OnInit {
     }
   }
 
-  /*
-  onLogoutClick(): void {
-    this.logoutModal.open();
-  }*/
-
   confermaLogout(): void {
     this.auth.logout?.();
     this.messaggio = 'Hai effettuato il logout.';
@@ -161,7 +156,7 @@ export class ListaDesideriComponent implements OnInit {
   onClickElimina(film: Film): void {
     this.noPermessiMsg = '';
     if (!this.isOnline) {
-      alert('Operazione non disponibile offline');
+      this.openOfflineModal();
       return;
     }
     if (!this.loggedIn) {
@@ -176,7 +171,7 @@ export class ListaDesideriComponent implements OnInit {
   onClickAggiungiAllaCollezione(film: Film): void {
     this.noPermessiMsg = '';
     if (!this.isOnline) {
-      alert('Operazione non disponibile offline');
+      this.openOfflineModal();
       return;
     }
     if (!this.loggedIn) {
@@ -273,4 +268,13 @@ export class ListaDesideriComponent implements OnInit {
       setTimeout(() => this.azioneMsg = '', 3500);
     });
   }
+
+  private openOfflineModal(): void {
+    const modalEl = document.getElementById('offlineOperationModal');
+    if (modalEl) {
+      const modalInstance = Modal.getOrCreateInstance(modalEl);
+      modalInstance.show();
+    }
+  }
+
 }
