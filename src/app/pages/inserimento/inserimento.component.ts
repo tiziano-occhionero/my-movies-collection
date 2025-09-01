@@ -62,8 +62,13 @@ export class InserimentoComponent implements OnInit {
 
     // Risultati ricerca film
     this.ricercaService.risultatiApi$.subscribe((risultati) => {
-      this.film = risultati;
+      // Mostra solo film con poster_path presente
+      this.film = risultati.filter(f => f.poster_path);
     });
+    /*
+    this.ricercaService.risultatiApi$.subscribe((risultati) => {
+      this.film = risultati;
+    });*/
 
     // Stato ricerca effettuata
     this.ricercaService.ricercaApiEffettuata$.subscribe((val) => {
