@@ -6,8 +6,9 @@ import { Film } from '../models/film.model';
 
 @Injectable({ providedIn: 'root' })
 export class ListaDesideriService {
-  // Chiave cache locale
-  private storageKey = 'listaDesideriFilm';
+  // Nuova chiave + chiave legacy per compatibilità
+  private storageKeyNew = 'listaDesideriFilm';
+  private storageKeyLegacy = 'listaDesideri';
 
   // Rotte coerenti con il tuo FilmController
   private listUrl = 'http://localhost:8080/api/films/wishlist';
@@ -23,13 +24,20 @@ export class ListaDesideriService {
     );
   }
 
-  /** Lettura cache locale (usata offline) */
+  /** Lettura cache locale (nuova chiave, con fallback alla legacy) */
   getLocal(): Film[] {
-    const dati = localStorage.getItem(this.storageKey);
-    return dati ? JSON.parse(dati) : [];
+    const datiNew = localStorage.getItem(this.storageKeyNew);
+    if (datiNew) return JSON.parse(datiNew);
+    const datiOld = localStorage.getItem(this.storageKeyLegacy);
+    return datiOld ? JSON.parse(datiOld) : [];
   }
 
-  /** POST crea in wishlist (il backend forza provenienza=wishlist) */
+  /** Scrive l'intera lista in cache (usa entrambe le chiavi per compatibilità) */
+  setLocal(list: Film[]): void {
+    this.saveLocal(list);
+  }
+
+  /** POST crea in wishlist */
   aggiungiFilm(film: Film): Observable<Film> {
     return this.http.post<Film>(this.postUrl, film).pipe(
       tap((saved) => this.appendLocal(saved ?? film))
@@ -56,7 +64,10 @@ export class ListaDesideriService {
 
   // ---------- Helpers cache locale ----------
   private saveLocal(films: Film[]): void {
-    localStorage.setItem(this.storageKey, JSON.stringify(films || []));
+    const payload = JSON.stringify(films || []);
+    // scrivi su entrambe le chiavi per migrazione dolce
+    localStorage.setItem(this.storageKeyNew, payload);
+    localStorage.setItem(this.storageKeyLegacy, payload);
   }
 
   private appendLocal(film: Film): void {

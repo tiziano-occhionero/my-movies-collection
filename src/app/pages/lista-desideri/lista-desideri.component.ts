@@ -212,7 +212,7 @@ export class ListaDesideriComponent implements OnInit {
         inst?.hide();
         // Aggiorna dati e UI
         this.listaDesideri = this.listaDesideri.filter(f => f.id !== id);
-        localStorage.setItem('listaDesideri', JSON.stringify(this.listaDesideri));
+        this.listaDesideriService.setLocal(this.listaDesideri);
         this.applicaFiltro();
         this.azioneMsg = 'Film rimosso dalla wishlist.';
         setTimeout(() => this.azioneMsg = '', 3000);
@@ -245,7 +245,7 @@ export class ListaDesideriComponent implements OnInit {
         next: () => {
           // aggiorna dati e UI
           this.listaDesideri = this.listaDesideri.filter(f => f.id !== film.id);
-          localStorage.setItem('listaDesideri', JSON.stringify(this.listaDesideri));
+          this.listaDesideriService.setLocal(this.listaDesideri);
           this.applicaFiltro();
           this.azioneMsg = 'Spostato in collezione.';
           setTimeout(() => this.azioneMsg = '', 3000);

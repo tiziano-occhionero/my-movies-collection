@@ -26,6 +26,8 @@ export class CollezioneComponent implements OnInit {
   tuttiIFilm: Film[] = [];
   film: Film[] = [];
   vista: 'galleria' | 'elenco' = 'galleria';
+  lastVistaOnline: 'galleria' | 'elenco' = 'galleria';
+
   query: string = '';
   ordinamento: string = 'alfabetico';
   messaggio: string = '';
@@ -54,9 +56,15 @@ export class CollezioneComponent implements OnInit {
   ngOnInit(): void {
     this.networkService.isOnline().subscribe(isOnline => {
       this.isOnline = isOnline;
+
       if (isOnline) {
+        // torna online → ripristina la vista preferita e ricarica da backend
+        this.vista = this.lastVistaOnline;
         this.caricaDaBackend();
       } else {
+        // va offline → ricorda la vista corrente e forza elenco
+        this.lastVistaOnline = this.vista;
+        this.vista = 'elenco';
         this.caricaDaLocale();
       }
     });
@@ -71,7 +79,7 @@ export class CollezioneComponent implements OnInit {
   get loggedIn(): boolean { return this.auth.isLoggedIn(); }
   get username(): string | null { return this.auth.getLoggedUsername(); }
 
-  // ---------- Login helpers (stesso pattern di Inserimento) ----------
+  // ---------- Login helpers ----------
   private openLoginModalSafely(): void {
     const openModalEl = document.querySelector('.modal.show') as HTMLElement | null;
     if (openModalEl) {
@@ -108,10 +116,8 @@ export class CollezioneComponent implements OnInit {
 
   onLoggedIn(e: { username: string; password: string }) {
     this.auth.login(e.username, e.password);
-    // chiudi il login modal se espone close()
     this.loginModal?.close?.();
 
-    // riprendi azione pendente
     if (this.pendingAfterLogin?.action === 'delete' && this.pendingAfterLogin.film) {
       this.selectedForDelete = this.pendingAfterLogin.film;
       this.pendingAfterLogin = null;
@@ -127,7 +133,7 @@ export class CollezioneComponent implements OnInit {
 
   // ---------- Data load ----------
   private caricaDaBackend(): void {
-    this.isLoading = true; // avvia lo spinner
+    this.isLoading = true;
     const snapshot = [...this.tuttiIFilm];
     this.loadErrorMsg = '';
 
@@ -139,14 +145,13 @@ export class CollezioneComponent implements OnInit {
       },
       error: (err: HttpErrorResponse) => {
         console.error('GET collezione fallito:', err);
-        // NON svuotare: ripristina la lista precedente e mostra l’alert
         this.tuttiIFilm = snapshot;
         this.film = [...this.tuttiIFilm];
         this.applicaRicerca();
         this.loadErrorMsg = `Impossibile aggiornare dalla rete (status ${err.status || 'n/d'}). Mostro i dati già caricati.`;
       },
       complete: () => {
-        this.isLoading = false; // ferma lo spinner
+        this.isLoading = false;
       }
     });
   }
@@ -165,7 +170,9 @@ export class CollezioneComponent implements OnInit {
   }
 
   setVista(vista: 'galleria' | 'elenco'): void {
+    if (!this.isOnline) return;        // offline → non permettere il cambio
     this.vista = vista;
+    this.lastVistaOnline = vista;      // ricorda preferenza per quando torni online
   }
 
   setOrdina(tipo: string): void {
@@ -187,13 +194,12 @@ export class CollezioneComponent implements OnInit {
     }
   }
 
-  // ---------- Rimozione: apre conferma o gate ----------
+  // ---------- Rimozione ----------
   onClickRimuovi(f: Film): void {
     this.noPermessiMsg = '';
     this.selectedForDelete = f;
 
     if (!this.loggedIn) {
-      // memorizza intento e mostra gate
       this.pendingAfterLogin = { action: 'delete', film: f };
       this.openLoginRequired();
       return;
@@ -207,7 +213,6 @@ export class CollezioneComponent implements OnInit {
   }
 
   annullaDelete(): void {
-    // basta chiudere, selectedForDelete resta o si può azzerare
     const el = document.getElementById('confirmDeleteModal');
     if (!el) return;
     (Modal.getInstance(el) || new Modal(el)).hide();
@@ -222,18 +227,13 @@ export class CollezioneComponent implements OnInit {
 
     this.collezioneService.rimuoviFilm(this.selectedForDelete.id)
       .then(() => {
-        // chiudi modale
         modalInst?.hide();
-
-        // ricarica da backend; se fallisce non svuotiamo
         this.caricaDaBackend();
-
         this.messaggio = 'Film rimosso dalla collezione.';
         setTimeout(() => this.messaggio = '', 3000);
       })
       .catch((e: HttpErrorResponse) => {
         if (e?.status === 401 || e?.status === 403) {
-          // sessione assente/scaduta: chiedi login
           this.pendingAfterLogin = { action: 'delete', film: this.selectedForDelete! };
           modalInst?.hide();
           this.openLoginRequired();
