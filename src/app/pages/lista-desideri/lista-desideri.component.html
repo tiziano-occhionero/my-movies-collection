@@ -31,7 +31,8 @@
           Vista
         </button>
         <ul class="dropdown-menu">
-          <li><a class="dropdown-item" href="#" (click)="$event.preventDefault(); setVista('galleria')">Galleria</a></li>
+          <li><a class="dropdown-item" href="#" (click)="$event.preventDefault(); setVista('galleria')">Galleria</a>
+          </li>
           <li><a class="dropdown-item" href="#" (click)="$event.preventDefault(); setVista('elenco')">Elenco</a></li>
         </ul>
       </div>
@@ -41,16 +42,19 @@
           Ordina
         </button>
         <ul class="dropdown-menu">
-          <li><a class="dropdown-item" href="#" (click)="$event.preventDefault(); setOrdina('alfabetico')">Alfabetico (A-Z)</a></li>
-          <li><a class="dropdown-item" href="#" (click)="$event.preventDefault(); setOrdina('anno-crescente')">Anno crescente</a></li>
-          <li><a class="dropdown-item" href="#" (click)="$event.preventDefault(); setOrdina('anno-decrescente')">Anno decrescente</a></li>
+          <li><a class="dropdown-item" href="#" (click)="$event.preventDefault(); setOrdina('alfabetico')">Alfabetico
+              (A-Z)</a></li>
+          <li><a class="dropdown-item" href="#" (click)="$event.preventDefault(); setOrdina('anno-crescente')">Anno
+              crescente</a></li>
+          <li><a class="dropdown-item" href="#" (click)="$event.preventDefault(); setOrdina('anno-decrescente')">Anno
+              decrescente</a></li>
         </ul>
       </div>
     </div>
 
     <!-- Nessun risultato -->
     <div *ngIf="listaDesideriFiltrata.length === 0 && (listaDesideri?.length || 0) > 0"
-         class="alert alert-warning mt-2">
+      class="alert alert-warning mt-2">
       Nessun film trovato in wishlist con il filtro corrente.
     </div>
 
@@ -60,8 +64,8 @@
       <div *ngIf="vista === 'galleria'" class="row mt-3">
         <div class="col-6 col-md-4 col-lg-3 d-flex mb-3" *ngFor="let f of listaDesideriFiltrata">
           <div class="card h-100 shadow-sm">
-            <img *ngIf="f.posterPath" [src]="'https://image.tmdb.org/t/p/w300' + f.posterPath"
-                 class="card-img-top" [alt]="f.titolo" />
+            <img *ngIf="f.posterPath" [src]="'https://image.tmdb.org/t/p/w300' + f.posterPath" class="card-img-top"
+              [alt]="f.titolo" />
             <div class="card-body d-flex flex-column">
               <h5 class="card-title mb-2">{{ f.titolo }} ({{ f.anno }})</h5>
               <p class="mb-1"><strong>Formato:</strong> {{ f.formato }}</p>
@@ -84,7 +88,7 @@
       <div *ngIf="vista === 'elenco'">
         <ul class="list-group mt-3">
           <li *ngFor="let f of listaDesideriFiltrata"
-              class="list-group-item d-flex align-items-center justify-content-between">
+            class="list-group-item d-flex align-items-center justify-content-between">
             <span>
               {{ f.titolo }} ({{ f.anno }}) - {{ f.formato }} - {{ f.custodia }}
             </span>
@@ -105,7 +109,7 @@
     <ng-template #offlineElenco>
       <ul class="list-group mt-3">
         <li *ngFor="let f of listaDesideriFiltrata"
-            class="list-group-item d-flex align-items-center justify-content-between">
+          class="list-group-item d-flex align-items-center justify-content-between">
           <span>
             {{ f.titolo }} ({{ f.anno }}) - {{ f.formato }} - {{ f.custodia }}
           </span>
@@ -122,7 +126,8 @@
     </ng-template>
 
     <!-- Modale: ACCESSO RICHIESTO (gate) -->
-    <div class="modal fade" id="loginRequiredModal" tabindex="-1" aria-labelledby="loginRequiredLabel" aria-hidden="true">
+    <div class="modal fade" id="loginRequiredModal" tabindex="-1" aria-labelledby="loginRequiredLabel"
+      aria-hidden="true">
       <div class="modal-dialog">
         <div class="modal-content">
           <div class="modal-header">
@@ -141,7 +146,8 @@
     </div>
 
     <!-- Modale: CONFERMA RIMOZIONE -->
-    <div class="modal fade" id="confirmDeleteModal" tabindex="-1" aria-labelledby="confirmDeleteLabel" aria-hidden="true">
+    <div class="modal fade" id="confirmDeleteModal" tabindex="-1" aria-labelledby="confirmDeleteLabel"
+      aria-hidden="true">
       <div class="modal-dialog">
         <div class="modal-content">
           <div class="modal-header">
@@ -161,13 +167,19 @@
       </div>
     </div>
 
+    <!-- Bottone "Torna su" -->
+    <button class="btn btn-primary position-fixed" style="font-size: 18px; padding-bottom: 7px; padding-top: 4px; border-radius: 25px; bottom: 20px; right: 20px; z-index: 1050;"
+      (click)="scrollToTop()" *ngIf="isScrollButtonVisible">
+      ▲
+    </button>
+
     <!-- Login / Logout modals -->
     <app-login-modal #loginRef (loggedIn)="onLoggedIn($event)"></app-login-modal>
     <app-logout-modal #logoutRef [modalId]="'logoutModalWishlist'" (confermato)="confermaLogout()"></app-logout-modal>
 
     <!-- Modale: OPERAZIONE NON DISPONIBILE OFFLINE -->
     <div class="modal fade" id="offlineOperationModal" tabindex="-1" aria-labelledby="offlineOperationLabel"
-         aria-hidden="true">
+      aria-hidden="true">
       <div class="modal-dialog">
         <div class="modal-content">
           <div class="modal-header">

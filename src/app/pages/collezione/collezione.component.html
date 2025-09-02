@@ -29,7 +29,8 @@
           Vista
         </button>
         <ul class="dropdown-menu">
-          <li><a class="dropdown-item" href="#" (click)="$event.preventDefault(); setVista('galleria')">Galleria</a></li>
+          <li><a class="dropdown-item" href="#" (click)="$event.preventDefault(); setVista('galleria')">Galleria</a>
+          </li>
           <li><a class="dropdown-item" href="#" (click)="$event.preventDefault(); setVista('elenco')">Elenco</a></li>
         </ul>
       </div>
@@ -39,9 +40,12 @@
           Ordina
         </button>
         <ul class="dropdown-menu">
-          <li><a class="dropdown-item" href="#" (click)="$event.preventDefault(); setOrdina('alfabetico')">Alfabetico (A-Z)</a></li>
-          <li><a class="dropdown-item" href="#" (click)="$event.preventDefault(); setOrdina('anno-crescente')">Anno crescente</a></li>
-          <li><a class="dropdown-item" href="#" (click)="$event.preventDefault(); setOrdina('anno-decrescente')">Anno decrescente</a></li>
+          <li><a class="dropdown-item" href="#" (click)="$event.preventDefault(); setOrdina('alfabetico')">Alfabetico
+              (A-Z)</a></li>
+          <li><a class="dropdown-item" href="#" (click)="$event.preventDefault(); setOrdina('anno-crescente')">Anno
+              crescente</a></li>
+          <li><a class="dropdown-item" href="#" (click)="$event.preventDefault(); setOrdina('anno-decrescente')">Anno
+              decrescente</a></li>
         </ul>
       </div>
     </div>
@@ -152,6 +156,12 @@
         </div>
       </div>
     </div>
+
+    <!-- Bottone "Torna su" -->
+    <button class="btn btn-primary position-fixed" style="font-size: 18px; padding-bottom: 7px; padding-top: 4px; border-radius: 25px; bottom: 20px; right: 20px; z-index: 1050;"
+      (click)="scrollToTop()" *ngIf="isScrollButtonVisible">
+      ▲
+    </button>
 
     <!-- Login Modal -->
     <app-login-modal #loginRef (loggedIn)="onLoggedIn($event)"></app-login-modal>

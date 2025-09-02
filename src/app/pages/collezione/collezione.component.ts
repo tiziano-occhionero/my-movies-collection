@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewChild } from '@angular/core';
+import { Component, OnInit, ViewChild, HostListener } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { HttpErrorResponse } from '@angular/common/http';
 
@@ -34,6 +34,9 @@ export class CollezioneComponent implements OnInit {
   isOnline: boolean = true;
   queryCorrente: string = '';
   isLoading = false;
+
+  // Stato bottone "torna su"
+  isScrollButtonVisible = false;
 
   // avvisi
   noPermessiMsg: string = '';
@@ -259,4 +262,16 @@ export class CollezioneComponent implements OnInit {
         this.isDeleting = false;
       });
   }
+
+  // Stato bottone "torna su"
+  @HostListener('window:scroll', [])
+  onWindowScroll() {
+    const scrollY = window.scrollY || document.documentElement.scrollTop;
+    this.isScrollButtonVisible = scrollY > 300; // Mostra dopo 300px di scroll
+  }
+
+  scrollToTop() {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
 }

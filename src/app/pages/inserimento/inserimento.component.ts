@@ -1,4 +1,4 @@
-import { Component, ViewChild, OnInit } from '@angular/core';
+import { Component, ViewChild, OnInit, HostListener } from '@angular/core';
 import { HttpErrorResponse } from '@angular/common/http';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -35,6 +35,9 @@ export class InserimentoComponent implements OnInit {
   confermaSuccesso = false;
   messaggio: string = '';
   isOnline: boolean = true;
+
+  // Stato bottone "torna su"
+  isScrollButtonVisible = false;
 
   // stato salvataggio
   isSaving = false;
@@ -317,4 +320,16 @@ export class InserimentoComponent implements OnInit {
       });
     });
   }
+
+  // Stato bottone "torna su"
+  @HostListener('window:scroll', [])
+  onWindowScroll() {
+    const scrollY = window.scrollY || document.documentElement.scrollTop;
+    this.isScrollButtonVisible = scrollY > 300; // Mostra dopo 300px di scroll
+  }
+
+  scrollToTop() {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
 }

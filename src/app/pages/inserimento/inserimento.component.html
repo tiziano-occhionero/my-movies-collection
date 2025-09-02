@@ -153,6 +153,12 @@
       </div>
     </div>
 
+    <!-- Bottone "Torna su" -->
+    <button class="btn btn-primary position-fixed" style="font-size: 18px; padding-bottom: 7px; padding-top: 4px; border-radius: 25px; bottom: 20px; right: 20px; z-index: 1050;"
+      (click)="scrollToTop()" *ngIf="isScrollButtonVisible">
+      ▲
+    </button>
+
     <!-- Login Modal -->
     <app-login-modal #loginRef (loggedIn)="onLoggedIn($event)"></app-login-modal>
     <app-logout-modal #logoutRef [modalId]="'logoutModalInserimento'"

@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewChild } from '@angular/core';
+import { Component, OnInit, ViewChild, HostListener } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 
@@ -46,6 +46,9 @@ export class ListaDesideriComponent implements OnInit {
   // Stato rimozione
   selectedForDelete: Film | null = null;
   isDeleting = false;
+
+  // Stato bottone "torna su"
+  isScrollButtonVisible = false;
 
   // Azione pendente post-login
   private pendingAfterLogin: { action: 'delete' | 'move'; film: Film } | null = null;
@@ -307,4 +310,16 @@ export class ListaDesideriComponent implements OnInit {
     const modalEl = document.getElementById('offlineOperationModal');
     if (modalEl) Modal.getOrCreateInstance(modalEl).show();
   }
+
+  // Stato bottone "torna su"
+  @HostListener('window:scroll', [])
+  onWindowScroll() {
+    const scrollY = window.scrollY || document.documentElement.scrollTop;
+    this.isScrollButtonVisible = scrollY > 300; // Mostra dopo 300px di scroll
+  }
+
+  scrollToTop() {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
 }
