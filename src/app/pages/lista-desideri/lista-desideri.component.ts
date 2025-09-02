@@ -28,6 +28,11 @@ export class ListaDesideriComponent implements OnInit {
   listaDesideri: Film[] = [];
   listaDesideriFiltrata: Film[] = [];
 
+  // Vista & ordinamento (come Collezione)
+  vista: 'galleria' | 'elenco' = 'galleria';
+  lastVistaOnline: 'galleria' | 'elenco' = 'galleria';
+  ordinamento: 'alfabetico' | 'anno-crescente' | 'anno-decrescente' = 'alfabetico';
+
   // Stato rete / auth
   isOnline: boolean = true;
   messaggio: string = '';
@@ -62,6 +67,13 @@ export class ListaDesideriComponent implements OnInit {
     this.networkService.isOnline().subscribe(isOnline => {
       this.isOnline = isOnline;
 
+      // Forza elenco se offline, ripristina ultima vista se online
+      if (!isOnline) {
+        this.vista = 'elenco';
+      } else {
+        this.vista = this.lastVistaOnline;
+      }
+
       if (isOnline) {
         this.listaDesideriService.getTuttiIFilm().subscribe({
           next: (dati) => {
@@ -78,27 +90,54 @@ export class ListaDesideriComponent implements OnInit {
       }
     });
 
-    // 🔎 ascolta la query da navbar (wishlist)
+    // 🔎 query da navbar
     this.ricercaService.wishlistQuery$.subscribe(q => {
       this.wishlistQueryView = q;
       this.applicaFiltro();
     });
   }
 
-  // ---------- Helpers filtro ----------
+  // ---------- Helpers filtro + ordinamento ----------
   private applicaFiltro(): void {
     const q = (this.wishlistQueryView || '').trim().toLowerCase();
     if (!q) {
       this.listaDesideriFiltrata = [...this.listaDesideri];
-      return;
+    } else {
+      this.listaDesideriFiltrata = this.listaDesideri.filter(f =>
+        (f.titolo || '').toLowerCase().includes(q)
+      );
     }
-    this.listaDesideriFiltrata = this.listaDesideri.filter(f =>
-      (f.titolo || '').toLowerCase().includes(q)
-    );
+    this.applicaOrdinamento();
+  }
+
+  private applicaOrdinamento(): void {
+    switch (this.ordinamento) {
+      case 'alfabetico':
+        this.listaDesideriFiltrata.sort((a, b) => (a.titolo || '').localeCompare(b.titolo || ''));
+        break;
+      case 'anno-crescente':
+        this.listaDesideriFiltrata.sort((a, b) => (a.anno || 0) - (b.anno || 0));
+        break;
+      case 'anno-decrescente':
+        this.listaDesideriFiltrata.sort((a, b) => (b.anno || 0) - (a.anno || 0));
+        break;
+    }
+  }
+
+  setVista(v: 'galleria' | 'elenco'): void {
+    this.vista = v;
+    if (this.isOnline) this.lastVistaOnline = v;
+  }
+
+  setOrdina(tipo: 'alfabetico' | 'anno-crescente' | 'anno-decrescente'): void {
+    this.ordinamento = tipo;
+    this.applicaOrdinamento();
   }
 
   private caricaDaLocale(): void {
-    this.listaDesideri = this.listaDesideriService.getLocal();
+    const data = this.listaDesideriService.getLocal?.()
+      ?? localStorage.getItem('listaDesideri');
+    this.listaDesideri = Array.isArray(data) ? data : (data ? JSON.parse(data) : []);
     this.applicaFiltro();
   }
 
@@ -132,7 +171,6 @@ export class ListaDesideriComponent implements OnInit {
     this.loginModal?.close?.();
     this.noPermessiMsg = '';
 
-    // Riprendi eventuale azione
     if (this.pendingAfterLogin) {
       const { action, film } = this.pendingAfterLogin;
       this.pendingAfterLogin = null;
@@ -205,9 +243,8 @@ export class ListaDesideriComponent implements OnInit {
     this.listaDesideriService.rimuoviFilm(id)
       .then(() => {
         inst?.hide();
-        // Aggiorna dati e UI
         this.listaDesideri = this.listaDesideri.filter(f => f.id !== id);
-        this.listaDesideriService.setLocal(this.listaDesideri);
+        this.listaDesideriService.setLocal?.(this.listaDesideri);
         this.applicaFiltro();
         this.azioneMsg = 'Film rimosso dalla wishlist.';
         setTimeout(() => this.azioneMsg = '', 3000);
@@ -232,15 +269,12 @@ export class ListaDesideriComponent implements OnInit {
 
   // ---------- Sposta in collezione ----------
   private performMoveToCollection(film: Film): void {
-    // 1) rimuovi dalla wishlist
     this.listaDesideriService.rimuoviFilm(film.id).then(() => {
-      // 2) aggiungi in collezione
       const filmConvertito: Film = { ...film, provenienza: 'collezione' as 'collezione' };
       this.collezioneService.aggiungiFilm(filmConvertito).subscribe({
         next: () => {
-          // aggiorna dati e UI
           this.listaDesideri = this.listaDesideri.filter(f => f.id !== film.id);
-          this.listaDesideriService.setLocal(this.listaDesideri);
+          this.listaDesideriService.setLocal?.(this.listaDesideri);
           this.applicaFiltro();
           this.azioneMsg = 'Spostato in collezione.';
           setTimeout(() => this.azioneMsg = '', 3000);
@@ -271,10 +305,6 @@ export class ListaDesideriComponent implements OnInit {
 
   private openOfflineModal(): void {
     const modalEl = document.getElementById('offlineOperationModal');
-    if (modalEl) {
-      const modalInstance = Modal.getOrCreateInstance(modalEl);
-      modalInstance.show();
-    }
+    if (modalEl) Modal.getOrCreateInstance(modalEl).show();
   }
-
 }

@@ -29,8 +29,8 @@
           Vista
         </button>
         <ul class="dropdown-menu">
-          <li><a class="dropdown-item" href="#" (click)="setVista('galleria')">Galleria</a></li>
-          <li><a class="dropdown-item" href="#" (click)="setVista('elenco')">Elenco</a></li>
+          <li><a class="dropdown-item" href="#" (click)="$event.preventDefault(); setVista('galleria')">Galleria</a></li>
+          <li><a class="dropdown-item" href="#" (click)="$event.preventDefault(); setVista('elenco')">Elenco</a></li>
         </ul>
       </div>
 
@@ -39,9 +39,9 @@
           Ordina
         </button>
         <ul class="dropdown-menu">
-          <li><a class="dropdown-item" href="#" (click)="setOrdina('alfabetico')">Alfabetico (A-Z)</a></li>
-          <li><a class="dropdown-item" href="#" (click)="setOrdina('anno-crescente')">Anno crescente</a></li>
-          <li><a class="dropdown-item" href="#" (click)="setOrdina('anno-decrescente')">Anno decrescente</a></li>
+          <li><a class="dropdown-item" href="#" (click)="$event.preventDefault(); setOrdina('alfabetico')">Alfabetico (A-Z)</a></li>
+          <li><a class="dropdown-item" href="#" (click)="$event.preventDefault(); setOrdina('anno-crescente')">Anno crescente</a></li>
+          <li><a class="dropdown-item" href="#" (click)="$event.preventDefault(); setOrdina('anno-decrescente')">Anno decrescente</a></li>
         </ul>
       </div>
     </div>
