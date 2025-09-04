@@ -1,16 +1,33 @@
-#mainNavbar {
+/* Effetto hide-on-scroll sul NAV */
+#siteNavbar {
   transition: top 0.3s ease;
   position: sticky;
   top: 0;
   z-index: 1030;
 
   &.hidden {
-    top: -80px; // altezza approssimativa della navbar
+    top: -80px;
   }
 }
 
+/* Spaziatura del bottone in mobile */
 @media (max-width: 991.98px) {
-    .bottoneLoginOut {
-        margin-top: 0.5rem !important;  /*mt-2 */
-    }
+  .bottoneLoginOut {
+    margin-top: 0.5rem !important;
+  }
+
+  /* mt-2 */
+}
+
+/* Paracadute: forza visibile il contenuto collassabile in desktop */
+@media (min-width: 992px) {
+  #navbarContent {
+    display: flex !important;
+  }
+}
+
+.navbar-brand {
+  text-decoration: underline;
+  font-family: serif;
+  font-style: italic;
 }
