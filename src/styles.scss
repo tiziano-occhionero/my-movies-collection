@@ -1,8 +1,6 @@
 /* You can add global styles to this file, and also import other style files */
 body {
-    background-color: lightgray;
-}
-
-.bg-nav-custom {
-  background-color: #032830 !important;
+  padding: 10px;
+  background-color: lightgray;
+  background: linear-gradient(270deg, rgb(180, 180, 180) 0%, rgb(216, 216, 216) 100%);
 }

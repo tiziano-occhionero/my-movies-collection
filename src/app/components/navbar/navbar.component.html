@@ -1,4 +1,4 @@
-<nav id="siteNavbar" class="navbar navbar-expand-lg bg-nav-custom navbar-dark sticky-top px-4" [class.hidden]="isHidden">
+<nav id="siteNavbar" class="navbar navbar-expand-lg bg-nav-custom navbar-dark sticky-top px-1" [class.hidden]="isHidden">
   <div class="container-fluid">
     <a class="navbar-brand" routerLink="/collezione">MyMoviesCollection</a>
 
@@ -22,7 +22,7 @@
       </ul>
 
       <!-- Gruppo destra: ricerca + utente -->
-      <div class="d-lg-flex ms-auto align-items-center gap-3 mt-2 mt-lg-0">
+      <div class="d-lg-flex ms-auto align-items-center gap-4 mt-2 mt-lg-0">
         <!-- Ricerca -->
         <form (ngSubmit)="onSubmit()" class="d-flex align-items-center gap-2 mb-0" role="search">
           <input class="form-control" type="search" placeholder="Cerca film" aria-label="Cerca" [(ngModel)]="query"
@@ -45,7 +45,8 @@
             </button>
           </ng-container>
           <ng-template #loggedBlock>
-            <span class="text-secondary small" *ngIf="username">({{ username }})</span>
+            <span class="text-secondary text-light mr-0">Ciao</span>
+            <span class="text-secondary text-light ml-0" *ngIf="username">{{ username }}</span>
             <button class="btn btn-outline-secondary" (click)="apriLogout()">
               Logout
             </button>

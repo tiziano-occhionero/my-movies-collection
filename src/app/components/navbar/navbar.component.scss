@@ -26,8 +26,18 @@
   }
 }
 
+.navbar {
+  border-radius: 25px;
+}
+
 .navbar-brand {
   text-decoration: underline;
-  font-family: serif;
+  /*font-family: serif;*/
   font-style: italic;
+  font-weight: lighter;
+}
+
+.bg-nav-custom {
+  background: #040036;
+  background: linear-gradient(270deg, rgb(11, 6, 93) 0%, rgb(6, 6, 45) 75%);
 }
