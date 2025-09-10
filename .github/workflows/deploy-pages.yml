@@ -19,6 +19,14 @@ jobs:
           node-version: '20'
       - run: npm ci
       - run: npm run build -- --configuration production --base-href "/my-movies-collection/"
+      - name: Lista contenuti dist
+        run: |
+          echo "== dist =="
+          ls -la dist || true
+          echo "== dist/my-movies-collection =="
+          ls -la dist/my-movies-collection || true
+          echo "== dist/my-movies-collection/browser =="
+          ls -la dist/my-movies-collection/browser || true
       - uses: actions/upload-pages-artifact@v3
         with:
           path: dist/my-movies-collection
