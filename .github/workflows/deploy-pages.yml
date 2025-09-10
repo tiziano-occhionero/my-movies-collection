@@ -21,7 +21,7 @@ jobs:
       - run: npm run build -- --configuration production --base-href "/my-movies-collection/"
       - uses: actions/upload-pages-artifact@v3
         with:
-          path: dist/**/browser
+          path: dist/my-movies-collection
 
   deploy:
     needs: build
