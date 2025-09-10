@@ -3,6 +3,7 @@ import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { Observable, firstValueFrom, of, throwError } from 'rxjs';
 import { catchError, map, tap } from 'rxjs/operators';
 import { Film } from '../models/film.model';
+import { environment } from '../../environments/environment';
 
 @Injectable({ providedIn: 'root' })
 export class CollezioneService {
@@ -10,11 +11,11 @@ export class CollezioneService {
   private storageKey = 'collezioneFilm';
 
   // Rotte coerenti con il tuo FilmController
-  private listUrl = 'http://localhost:8080/api/films/collezione';
-  private postUrl = 'http://localhost:8080/api/films/collezione';
-  private deleteBase = 'http://localhost:8080/api/films/collezione';
+  private listUrl = `${environment.apiBaseUrl}/films/collezione`;
+  private postUrl = `${environment.apiBaseUrl}/films/collezione`;
+  private deleteBase = `${environment.apiBaseUrl}/films/collezione`;
 
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient) { }
 
   /** GET lista collezione dal backend + salvataggio locale */
   getTuttiIFilm(): Observable<Film[]> {

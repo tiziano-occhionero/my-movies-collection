@@ -2,12 +2,13 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { Film } from '../models/film.model';
+import { environment } from '../../environments/environment';
 
 @Injectable({
   providedIn: 'root'
 })
 export class BackendService {
-  private baseUrl = 'http://localhost:8080/api/films'; // <- unica URL base
+  private baseUrl = `${environment.apiBaseUrl}/films`; // <- unica URL base
 
   constructor(private http: HttpClient) { }
 

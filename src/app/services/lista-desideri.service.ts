@@ -3,6 +3,7 @@ import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { Observable, firstValueFrom, of, throwError } from 'rxjs';
 import { catchError, map, tap } from 'rxjs/operators';
 import { Film } from '../models/film.model';
+import { environment } from '../../environments/environment';
 
 @Injectable({ providedIn: 'root' })
 export class ListaDesideriService {
@@ -11,11 +12,11 @@ export class ListaDesideriService {
   private storageKeyLegacy = 'listaDesideri';
 
   // Rotte coerenti con il tuo FilmController
-  private listUrl = 'http://localhost:8080/api/films/wishlist';
-  private postUrl = 'http://localhost:8080/api/films/wishlist';
-  private deleteBase = 'http://localhost:8080/api/films/wishlist';
+  private listUrl = `${environment.apiBaseUrl}/films/wishlist`;
+  private postUrl = `${environment.apiBaseUrl}/films/wishlist`;
+  private deleteBase = `${environment.apiBaseUrl}/films/wishlist`;
 
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient) { }
 
   /** GET lista wishlist dal backend + salvataggio locale */
   getTuttiIFilm(): Observable<Film[]> {

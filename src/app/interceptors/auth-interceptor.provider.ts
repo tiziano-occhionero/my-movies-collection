@@ -2,8 +2,9 @@
 import { HttpInterceptorFn } from '@angular/common/http';
 import { inject } from '@angular/core';
 import { AuthService } from '../services/auth.service';
+import { environment } from '../../environments/environment';
 
-const BACKEND_BASE = 'http://localhost:8080/';
+const BACKEND_BASE = environment.apiBaseUrl;;
 
 export const authInterceptorFn: HttpInterceptorFn = (req, next) => {
   const method = req.method.toUpperCase();
