@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>Redirecting…</title>
+    <script>
+      /* SPA GitHub Pages redirect */
+      var segment = "/my-movies-collection";
+      var l = window.location;
+      // se siamo già alla root del repo, porta a index
+      if (!l.pathname.startsWith(segment)) {
+        window.location.replace(segment + "/");
+      } else {
+        // preserva path e query come param dopo "?"
+        var path = l.pathname.substring(segment.length);
+        var search = l.search ? l.search + "&" : "?";
+        var newUrl = segment + "/" + search + "p=" + encodeURIComponent(path) + l.hash;
+        window.location.replace(newUrl);
+      }
+    </script>
+  </head>
+  <body>Redirecting…</body>
+</html>
