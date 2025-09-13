@@ -62,7 +62,7 @@
     <ng-container *ngIf="isOnline; else offlineElenco">
       <!-- Vista: Galleria -->
       <div *ngIf="vista === 'galleria'" class="row mt-3">
-        <div class="col-6 col-md-4 col-lg-3 d-flex mb-3" *ngFor="let f of listaDesideriFiltrata">
+        <div class="col-12 col-md-4 col-lg-3 mb-3" *ngFor="let f of listaDesideriFiltrata">
           <div class="card h-100 shadow">
             <img *ngIf="f.posterPath" [src]="'https://image.tmdb.org/t/p/w300' + f.posterPath" class="card-img-top"
               [alt]="f.titolo" />
