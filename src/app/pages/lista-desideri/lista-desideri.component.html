@@ -7,6 +7,11 @@
       Modalità offline: inserimento, rimozione e modifiche non sono disponibili.
     </div>
 
+    <div class="alert alert-warning py-2" *ngIf="!onlineEffettivo">
+      Server in avvio: mostro i dati salvati sul dispositivo. Le azioni (aggiunta/rimozione/spostamento) sono
+      disabilitate finché la connessione non è attiva.
+    </div>
+
     <!-- Avvisi -->
     <div *ngIf="messaggio" class="alert alert-success mt-2">
       {{ messaggio }}
@@ -168,7 +173,8 @@
     </div>
 
     <!-- Bottone "Torna su" -->
-    <button class="btn btn-primary position-fixed" style="font-size: 18px; padding-bottom: 7px; padding-top: 4px; border-radius: 25px; bottom: 20px; right: 20px; z-index: 1050;"
+    <button class="btn btn-primary position-fixed"
+      style="font-size: 18px; padding-bottom: 7px; padding-top: 4px; border-radius: 25px; bottom: 20px; right: 20px; z-index: 1050;"
       (click)="scrollToTop()" *ngIf="isScrollButtonVisible">
       ▲
     </button>

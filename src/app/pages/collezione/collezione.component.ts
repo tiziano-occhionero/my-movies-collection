@@ -11,6 +11,7 @@ import { Film } from '../../models/film.model';
 import { LoginModalComponent } from '../../components/login-modal/login-modal.component';
 import Modal from 'bootstrap/js/dist/modal';
 import { LogoutModalComponent } from '../../components/logout-modal/logout-modal.component';
+import { HealthService } from '../../services/health.service';
 
 @Component({
   selector: 'app-collezione',
@@ -49,29 +50,48 @@ export class CollezioneComponent implements OnInit {
   // azione pendente post-login
   private pendingAfterLogin: { action: 'delete'; film: Film } | null = null;
 
+  // Backend awake
+  isBackendAwake = false;
+  get onlineEffettivo(): boolean { return this.isOnline && this.isBackendAwake; }
+
   constructor(
     private collezioneService: CollezioneService,
     private ricercaService: RicercaService,
     private networkService: NetworkService,
-    public auth: AuthService
+    public auth: AuthService,
+    private health: HealthService
   ) { }
 
   ngOnInit(): void {
+    // Sveglia Render e osserva lo stato backend
+    this.health.start();
+    this.health.isAwake$().subscribe((ok: boolean) => {
+      const prima = this.isBackendAwake;
+      this.isBackendAwake = ok;
+      if (!prima && ok && this.isOnline) {
+        this.vista = this.lastVistaOnline;
+        this.caricaDaBackend();
+      }
+    });
+
+
+    // Stato rete
     this.networkService.isOnline().subscribe(isOnline => {
       this.isOnline = isOnline;
 
-      if (isOnline) {
-        // torna online → ripristina la vista preferita e ricarica da backend
+      if (this.onlineEffettivo) {
+        // online + backend sveglio → ripristina vista e ricarica
         this.vista = this.lastVistaOnline;
         this.caricaDaBackend();
       } else {
-        // va offline → ricorda la vista corrente e forza elenco
+        // offline (rete o backend) → ricorda vista e forza elenco + locale
         this.lastVistaOnline = this.vista;
         this.vista = 'elenco';
         this.caricaDaLocale();
       }
     });
 
+    // Ricerca
     this.ricercaService.collezioneQuery$.subscribe((query: string) => {
       this.queryCorrente = query;
       this.query = query.toLowerCase();
@@ -173,9 +193,9 @@ export class CollezioneComponent implements OnInit {
   }
 
   setVista(vista: 'galleria' | 'elenco'): void {
-    if (!this.isOnline) return;        // offline → non permettere il cambio
+    if (!this.onlineEffettivo) return; // offline “effettivo” → blocca
     this.vista = vista;
-    this.lastVistaOnline = vista;      // ricorda preferenza per quando torni online
+    this.lastVistaOnline = vista;
   }
 
   setOrdina(tipo: string): void {
@@ -201,8 +221,8 @@ export class CollezioneComponent implements OnInit {
   onClickRimuovi(f: Film): void {
     this.noPermessiMsg = '';
 
-    // ❌ Offline: blocca e mostra modale informativo
-    if (!this.isOnline) {
+    // ❌ Offline effettivo: blocca e mostra modale informativo
+    if (!this.onlineEffettivo) {
       this.openOfflineModal();
       return;
     }

@@ -14,6 +14,7 @@ import { AuthService } from '../../services/auth.service';
 import { Film } from '../../models/film.model';
 import { LogoutModalComponent } from '../../components/logout-modal/logout-modal.component';
 import { NetworkService } from '../../services/network.service';
+import { HealthService } from '../../services/health.service';
 
 @Component({
   selector: 'app-inserimento',
@@ -48,6 +49,10 @@ export class InserimentoComponent implements OnInit {
   // (legacy) avviso dentro modale: non più usato per l’apertura
   noPermessi = false;
 
+  // Backend awake
+  isBackendAwake = false;
+  get onlineEffettivo(): boolean { return this.isOnline && this.isBackendAwake; }
+
   constructor(
     private ricercaService: RicercaService,
     private collezioneService: CollezioneService,
@@ -55,6 +60,7 @@ export class InserimentoComponent implements OnInit {
     private listaDesideriService: ListaDesideriService,
     public auth: AuthService,
     private networkService: NetworkService,
+    private health: HealthService,
   ) { }
 
   ngOnInit(): void {
@@ -62,6 +68,10 @@ export class InserimentoComponent implements OnInit {
     this.networkService.isOnline().subscribe((isOnline: boolean) => {
       this.isOnline = isOnline;
     });
+
+    // Sveglia Render e osserva lo stato backend
+    this.health.start();
+    this.health.isAwake$().subscribe((ok: boolean) => this.isBackendAwake = ok);
 
     // Risultati ricerca film
     this.ricercaService.risultatiApi$.subscribe((risultati) => {
@@ -246,6 +256,13 @@ export class InserimentoComponent implements OnInit {
 
   confermaAggiunta(): void {
     if (!this.filmSelezionato || !this.formatoSelezionato || !this.custodiaSelezionata || this.isSaving) return;
+
+    // ❌ Blocca se offline effettivo (rete o backend non pronto)
+    if (!this.onlineEffettivo) {
+      this.noPermessi = true; // o apri una modale/alert
+      return;
+    }
+
     this.isSaving = true;
 
     const id = `${this.filmSelezionato.id}_${this.formatoSelezionato}_${this.custodiaSelezionata}`;
@@ -287,6 +304,12 @@ export class InserimentoComponent implements OnInit {
 
   aggiungiAllaListaDesideri(): void {
     if (!this.filmSelezionato || !this.formatoSelezionato || !this.custodiaSelezionata) return;
+
+    // ❌ Blocca se offline effettivo
+    if (!this.onlineEffettivo) {
+      this.noPermessi = true; // o apri una modale/alert
+      return;
+    }
 
     const id = `${this.filmSelezionato.id}_${this.formatoSelezionato}_${this.custodiaSelezionata}`;
 

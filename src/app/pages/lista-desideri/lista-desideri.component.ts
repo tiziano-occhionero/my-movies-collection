@@ -12,6 +12,7 @@ import { Film } from '../../models/film.model';
 import { LoginModalComponent } from '../../components/login-modal/login-modal.component';
 import Modal from 'bootstrap/js/dist/modal';
 import { LogoutModalComponent } from '../../components/logout-modal/logout-modal.component';
+import { HealthService } from '../../services/health.service';
 
 @Component({
   selector: 'app-lista-desideri',
@@ -56,28 +57,35 @@ export class ListaDesideriComponent implements OnInit {
   // Query corrente (solo display/filtri)
   private wishlistQueryView: string = '';
 
+  // Backend awake
+  isBackendAwake = false;
+  get onlineEffettivo(): boolean { return this.isOnline && this.isBackendAwake; }
+
   constructor(
     private collezioneService: CollezioneService,
     private listaDesideriService: ListaDesideriService,
     private networkService: NetworkService,
     private http: HttpClient,
     private ricercaService: RicercaService,
-    public auth: AuthService
+    public auth: AuthService,
+    private health: HealthService
   ) { }
 
   ngOnInit(): void {
+    // Sveglia Render e osserva lo stato backend
+    this.health.start();
+    this.health.isAwake$().subscribe((ok: boolean) => this.isBackendAwake = ok);
+
     // Stato rete + primi dati
     this.networkService.isOnline().subscribe(isOnline => {
       this.isOnline = isOnline;
 
-      // Forza elenco se offline, ripristina ultima vista se online
-      if (!isOnline) {
+      // Forza elenco se offline effettivo, ripristina ultima vista se online effettivo
+      if (!this.onlineEffettivo) {
         this.vista = 'elenco';
+        this.caricaDaLocale();
       } else {
         this.vista = this.lastVistaOnline;
-      }
-
-      if (isOnline) {
         this.listaDesideriService.getTuttiIFilm().subscribe({
           next: (dati) => {
             this.listaDesideri = dati ?? [];
@@ -88,8 +96,6 @@ export class ListaDesideriComponent implements OnInit {
             this.caricaDaLocale();
           }
         });
-      } else {
-        this.caricaDaLocale();
       }
     });
 
@@ -128,6 +134,7 @@ export class ListaDesideriComponent implements OnInit {
   }
 
   setVista(v: 'galleria' | 'elenco'): void {
+    if (!this.onlineEffettivo) return; // blocca se backend non pronto
     this.vista = v;
     if (this.isOnline) this.lastVistaOnline = v;
   }
@@ -196,7 +203,7 @@ export class ListaDesideriComponent implements OnInit {
   // ---------- Click handlers ----------
   onClickElimina(film: Film): void {
     this.noPermessiMsg = '';
-    if (!this.isOnline) {
+    if (!this.onlineEffettivo) {
       this.openOfflineModal();
       return;
     }
@@ -211,7 +218,7 @@ export class ListaDesideriComponent implements OnInit {
 
   onClickAggiungiAllaCollezione(film: Film): void {
     this.noPermessiMsg = '';
-    if (!this.isOnline) {
+    if (!this.onlineEffettivo) {
       this.openOfflineModal();
       return;
     }
