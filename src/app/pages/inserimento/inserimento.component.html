@@ -48,12 +48,12 @@
               </p>
 
               <!-- Dettagli (overlay, non espande la card) -->
-              <div class="accordion position-relative mb-2">
+              <div class="accordion  position-relative mb-2">
                 <div class="accordion-item border-0">
                   <h2 class="accordion-header">
-                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
-                      [attr.data-bs-target]="'#overlay-' + f.id" aria-expanded="false"
-                      [attr.aria-controls]="'overlay-' + f.id" (click)="caricaDettagliFilm(f)">
+                    <button class="accordion-button dettagli collapsed" type="button"
+                      (click)="toggleDettagli(f, $event); caricaDettagliFilm(f)"
+                      [attr.aria-controls]="'overlay-' + f.id" [attr.aria-expanded]="false">
                       Dettagli
                     </button>
                   </h2>
@@ -123,8 +123,8 @@
           </div>
 
           <div class="modal-footer">
-            <button class="btn btn-primary flex-fill" [disabled]="!formatoSelezionato || !custodiaSelezionata || confermaSuccesso"
-              (click)="confermaAggiunta()">
+            <button class="btn btn-primary flex-fill"
+              [disabled]="!formatoSelezionato || !custodiaSelezionata || confermaSuccesso" (click)="confermaAggiunta()">
               Conferma
             </button>
             <button class="btn btn-outline-secondary flex-fill"

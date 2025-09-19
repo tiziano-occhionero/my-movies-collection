@@ -6,14 +6,19 @@
 }
 
 @media (max-width: 767.98px) {
-    .colSmart {
-        display: flex;
-        justify-content: center;
-    }
+  .colSmart {
+    display: flex;
+    justify-content: center;
+  }
+
+  .dettagli {
+    padding-top: 0;
+    padding-bottom: 0;
+  }
 }
 
 @media (max-width: 364.98px) {
-  .modal-footer{
+  .modal-footer {
     align-items: center;
   }
 }

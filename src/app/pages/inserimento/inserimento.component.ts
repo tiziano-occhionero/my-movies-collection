@@ -3,6 +3,7 @@ import { HttpErrorResponse } from '@angular/common/http';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import Modal from 'bootstrap/js/dist/modal';
+import Collapse from 'bootstrap/js/dist/collapse';
 
 import { LoginModalComponent } from '../../components/login-modal/login-modal.component';
 import { RicercaService } from '../../services/ricerca.service';
@@ -178,6 +179,54 @@ export class InserimentoComponent implements OnInit {
       film.attori = attoriPrincipali.map((a: any) => a?.name).filter(Boolean);
       film.dettagliCaricati = true;
     });
+  }
+
+  /**
+   * Toggle programmatico dell'accordion "Dettagli" per un film.
+   * - Se è aperto: chiude.
+   * - Se è chiuso: chiude gli altri e apre questo.
+   * Aggiorna anche aria-expanded e la classe 'collapsed' del bottone.
+   */
+  toggleDettagli(f: any, ev: MouseEvent): void {
+    ev.preventDefault();
+    ev.stopPropagation();
+
+    const id = `overlay-${f.id}`;
+    const panel = document.getElementById(id);
+    if (!panel) return;
+
+    const wasShown = panel.classList.contains('show');
+    const inst = Collapse.getOrCreateInstance(panel, { toggle: false });
+
+    const btn = ev.currentTarget as HTMLElement;
+    const container = document.getElementById('accordion-container');
+
+    if (wasShown) {
+      // Era aperto → chiudi
+      inst.hide();
+      btn.classList.add('collapsed');
+      btn.setAttribute('aria-expanded', 'false');
+    } else {
+      // Era chiuso → chiudi eventuali altri aperti (esclusivo)
+      if (container) {
+        container.querySelectorAll<HTMLElement>('.accordion-collapse.show').forEach(el => {
+          if (el.id !== id) {
+            Collapse.getOrCreateInstance(el, { toggle: false }).hide();
+          }
+        });
+        // Mantieni coerenti anche i bottoni degli altri
+        container.querySelectorAll<HTMLElement>('.accordion-button.dettagli[aria-controls]').forEach(b => {
+          if (b.getAttribute('aria-controls') !== id) {
+            b.classList.add('collapsed');
+            b.setAttribute('aria-expanded', 'false');
+          }
+        });
+      }
+      // Apri questo
+      inst.show();
+      btn.classList.remove('collapsed');
+      btn.setAttribute('aria-expanded', 'true');
+    }
   }
 
   /** Click su "Aggiungi alla collezione" */

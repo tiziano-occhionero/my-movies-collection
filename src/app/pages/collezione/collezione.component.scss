@@ -3,8 +3,14 @@
         display: flex;
         justify-content: center;
     }
-}
 
-@media (max-width: 575.98px) { 
-    
+    .card {
+        h5 {
+           margin-bottom: 0px; 
+        }
+        .mt-auto p {
+            margin-bottom: 0px;
+        }
+    }
+
 }
