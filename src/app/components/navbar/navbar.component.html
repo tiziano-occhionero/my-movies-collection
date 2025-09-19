@@ -12,13 +12,16 @@
       <!-- Navigazione tra pagine -->
       <ul class="navbar-nav me-auto mb-2 mb-lg-0">
         <li class="nav-item">
-          <a class="nav-link" routerLink="/inserimento" routerLinkActive="active">Inserimento</a>
+          <a class="nav-link" routerLink="/inserimento" routerLinkActive="active"
+            (click)="onNavLinkClick('/inserimento')">Inserimento</a>
         </li>
         <li class="nav-item">
-          <a class="nav-link" routerLink="/collezione" routerLinkActive="active">Collezione</a>
+          <a class="nav-link" routerLink="/collezione" routerLinkActive="active"
+            (click)="onNavLinkClick('/collezione')">Collezione</a>
         </li>
         <li class="nav-item">
-          <a class="nav-link" routerLink="/lista-desideri" routerLinkActive="active">Lista desideri</a>
+          <a class="nav-link" routerLink="/lista-desideri" routerLinkActive="active"
+            (click)="onNavLinkClick('/lista-desideri')">Lista desideri</a>
         </li>
       </ul>
 
