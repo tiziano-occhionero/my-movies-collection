@@ -30,12 +30,13 @@ export class NavbarComponent implements AfterViewInit {
   @ViewChild('loginRef') loginModal!: LoginModalComponent;
   @ViewChild('logoutRef') logoutModal!: LogoutModalComponent;
 
-  // Riferimento al contenitore del collapse (assicurati che nel tuo HTML ci sia #navbarCollapse)
+  // Riferimenti navbar
   @ViewChild('navbarCollapse', { static: true }) navbarCollapse!: ElementRef<HTMLElement>;
+  @ViewChild('navbarToggler', { static: true }) navbarToggler!: ElementRef<HTMLButtonElement>;
   private bsCollapse?: Collapse;
 
-  // Stato menu e soppressione (per evitare richiudersi subito dopo apertura per micro-scroll/shift)
-  private menuOpen = false;
+  // Stato menu e soppressione (evita richiudersi subito per micro-scroll/shift)
+  menuOpen = false;
   private suppressClose = false;
   private suppressTimer?: any;
 
@@ -58,27 +59,52 @@ export class NavbarComponent implements AfterViewInit {
     const el = this.navbarCollapse.nativeElement;
     this.bsCollapse = Collapse.getOrCreateInstance(el, { toggle: false });
 
-    // Apertura: mantieni visibile la navbar e sopprimi chiusure per un attimo
+    // Apertura: pin visibile, aggiorna stato + aria, sopprimi chiusure momentanee
     el.addEventListener('show.bs.collapse', () => {
       this.menuOpen = true;
-      this.isHidden = false;               // pin visibile mentre apre/aperta
+      this.isHidden = false;
+      this.updateAriaExpanded(true);
       this.startSuppressClose(400);
     });
     el.addEventListener('shown.bs.collapse', () => {
       this.menuOpen = true;
       this.isHidden = false;
+      this.updateAriaExpanded(true);
       this.startSuppressClose(250);
     });
 
-    // Chiusura: rimuovi soppressione e sblocca comportamento normale
+    // Chiusura: ripristina stato + aria
     el.addEventListener('hide.bs.collapse', () => {
       this.menuOpen = false;
+      this.updateAriaExpanded(false);
       this.stopSuppressClose();
     });
     el.addEventListener('hidden.bs.collapse', () => {
       this.menuOpen = false;
+      this.updateAriaExpanded(false);
       this.stopSuppressClose();
     });
+  }
+
+  // --- Toggle via bottone (niente data-bs-*) ---
+  onTogglerClick(ev: MouseEvent): void {
+    ev.preventDefault();
+    ev.stopPropagation();
+    if (!this.bsCollapse) return;
+
+    if (this.menuOpen) {
+      this.bsCollapse.hide();
+    } else {
+      // Evita che eventuali micro-shift richiudano subito
+      this.startSuppressClose(400);
+      this.bsCollapse.show();
+    }
+  }
+
+  private updateAriaExpanded(expanded: boolean): void {
+    try {
+      this.navbarToggler?.nativeElement.setAttribute('aria-expanded', expanded ? 'true' : 'false');
+    } catch {}
   }
 
   private startSuppressClose(ms: number) {
@@ -164,7 +190,6 @@ export class NavbarComponent implements AfterViewInit {
   }
   confermaLogout(): void {
     this.auth.logout?.();
-    // nessun alert qui: gli avvisi eventuali restano nelle pagine
   }
 
   // helper eventuali
@@ -177,22 +202,20 @@ export class NavbarComponent implements AfterViewInit {
     const delta = currentScroll - this.lastScrollTop;
     const absDelta = Math.abs(delta);
 
-    // SE il menu è aperto: tieni sempre visibile la navbar e chiudi al primo scroll "vero"
+    // Se il menu è aperto: pin visibile e chiudi al primo scroll "vero"
     if (this.menuOpen) {
-      this.isHidden = false; // pin visibile mentre il menu è aperto
+      this.isHidden = false;
       if (!this.suppressClose && absDelta > 12) {
-        this.closeNavbarIfOpen(); // chiude sia su che giù (risolve il punto 1)
+        this.closeNavbarIfOpen();
       }
       this.lastScrollTop = currentScroll <= 0 ? 0 : currentScroll;
       return;
     }
 
-    // Menu chiuso: ripristina il tuo comportamento hide-on-scroll
+    // Menu chiuso: comportamento hide-on-scroll
     if (currentScroll > this.lastScrollTop && currentScroll > 50) {
-      // Scroll verso il basso → nascondi
       this.isHidden = true;
     } else {
-      // Scroll verso l'alto → mostra
       this.isHidden = false;
     }
 

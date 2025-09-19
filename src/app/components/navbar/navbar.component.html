@@ -1,9 +1,10 @@
-<nav id="siteNavbar" class="navbar navbar-expand-lg bg-nav-custom navbar-dark sticky-top px-3" [class.hidden]="isHidden">
+<nav id="siteNavbar" class="navbar navbar-expand-lg bg-nav-custom navbar-dark sticky-top px-3"
+  [class.hidden]="isHidden">
   <div class="container-fluid">
     <a class="navbar-brand" style="line-height: 15px;" routerLink="/collezione">MyMovies <br> Collection</a>
 
-    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent"
-      aria-controls="navbarContent" aria-expanded="false" aria-label="Toggle navigation">
+    <button #navbarToggler class="navbar-toggler" type="button" (click)="onTogglerClick($event)"
+      [attr.aria-expanded]="menuOpen" aria-controls="navbarContent" aria-label="Toggle navigation">
       <span class="navbar-toggler-icon"></span>
     </button>
 
