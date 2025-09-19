@@ -4,7 +4,7 @@ body {
 
 /* width */
 ::-webkit-scrollbar {
-  width: 15px;
+  width: 12px;
 }
 
 /* Track */
@@ -15,11 +15,11 @@ body {
  
 /* Handle */
 ::-webkit-scrollbar-thumb {
-  background: rgb(11, 6, 93); 
+  background:  #dc3545; 
   border-radius: 10px;
 }
 
 /* Handle on hover */
 ::-webkit-scrollbar-thumb:hover {
-  background: rgb(6, 6, 45); 
+  background: #bb2d3b; 
 }
