@@ -1,4 +1,4 @@
-import { Component, ViewChild, HostListener } from '@angular/core';
+import { Component, ViewChild, HostListener, ElementRef, AfterViewInit } from '@angular/core';
 import { Router, RouterModule, NavigationEnd } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
@@ -11,6 +11,9 @@ import { AuthService } from '../../services/auth.service';
 import { LoginModalComponent } from '../login-modal/login-modal.component';
 import { LogoutModalComponent } from '../logout-modal/logout-modal.component';
 
+// Bootstrap JS (per controllare il collapse da TS)
+import Collapse from 'bootstrap/js/dist/collapse';
+
 @Component({
   selector: 'app-navbar',
   standalone: true,
@@ -18,7 +21,7 @@ import { LogoutModalComponent } from '../logout-modal/logout-modal.component';
   templateUrl: './navbar.component.html',
   styleUrls: ['./navbar.component.scss']
 })
-export class NavbarComponent {
+export class NavbarComponent implements AfterViewInit {
   query = '';
   private lastScrollTop = 0;
   isHidden = false;
@@ -27,16 +30,68 @@ export class NavbarComponent {
   @ViewChild('loginRef') loginModal!: LoginModalComponent;
   @ViewChild('logoutRef') logoutModal!: LogoutModalComponent;
 
+  // Riferimento al contenitore del collapse (assicurati che nel tuo HTML ci sia #navbarCollapse)
+  @ViewChild('navbarCollapse', { static: true }) navbarCollapse!: ElementRef<HTMLElement>;
+  private bsCollapse?: Collapse;
+
+  // Stato menu e soppressione (per evitare richiudersi subito dopo apertura per micro-scroll/shift)
+  private menuOpen = false;
+  private suppressClose = false;
+  private suppressTimer?: any;
+
   constructor(
     private router: Router,
     private ricercaService: RicercaService,
     private tmdbService: TmdbService,
     public auth: AuthService
   ) {
-    // svuota solo l’INPUT ad ogni cambio rotta (i filtri restano dove applicati)
+    // Svuota solo l’INPUT ad ogni cambio rotta (i filtri restano dove applicati)
     this.router.events.pipe(filter(e => e instanceof NavigationEnd)).subscribe(() => {
       this.query = '';
+      // Chiudi il collapse al cambio rotta su mobile
+      if (window.innerWidth < 992) this.closeNavbarIfOpen();
     });
+  }
+
+  // Inizializza Bootstrap Collapse e collega gli eventi
+  ngAfterViewInit(): void {
+    const el = this.navbarCollapse.nativeElement;
+    this.bsCollapse = Collapse.getOrCreateInstance(el, { toggle: false });
+
+    // Apertura: mantieni visibile la navbar e sopprimi chiusure per un attimo
+    el.addEventListener('show.bs.collapse', () => {
+      this.menuOpen = true;
+      this.isHidden = false;               // pin visibile mentre apre/aperta
+      this.startSuppressClose(400);
+    });
+    el.addEventListener('shown.bs.collapse', () => {
+      this.menuOpen = true;
+      this.isHidden = false;
+      this.startSuppressClose(250);
+    });
+
+    // Chiusura: rimuovi soppressione e sblocca comportamento normale
+    el.addEventListener('hide.bs.collapse', () => {
+      this.menuOpen = false;
+      this.stopSuppressClose();
+    });
+    el.addEventListener('hidden.bs.collapse', () => {
+      this.menuOpen = false;
+      this.stopSuppressClose();
+    });
+  }
+
+  private startSuppressClose(ms: number) {
+    this.suppressClose = true;
+    if (this.suppressTimer) clearTimeout(this.suppressTimer);
+    this.suppressTimer = setTimeout(() => (this.suppressClose = false), ms);
+  }
+  private stopSuppressClose() {
+    this.suppressClose = false;
+    if (this.suppressTimer) {
+      clearTimeout(this.suppressTimer);
+      this.suppressTimer = undefined;
+    }
   }
 
   // stato auth per la UI
@@ -119,7 +174,20 @@ export class NavbarComponent {
   @HostListener('window:scroll', [])
   onWindowScroll() {
     const currentScroll = window.scrollY || document.documentElement.scrollTop;
+    const delta = currentScroll - this.lastScrollTop;
+    const absDelta = Math.abs(delta);
 
+    // SE il menu è aperto: tieni sempre visibile la navbar e chiudi al primo scroll "vero"
+    if (this.menuOpen) {
+      this.isHidden = false; // pin visibile mentre il menu è aperto
+      if (!this.suppressClose && absDelta > 12) {
+        this.closeNavbarIfOpen(); // chiude sia su che giù (risolve il punto 1)
+      }
+      this.lastScrollTop = currentScroll <= 0 ? 0 : currentScroll;
+      return;
+    }
+
+    // Menu chiuso: ripristina il tuo comportamento hide-on-scroll
     if (currentScroll > this.lastScrollTop && currentScroll > 50) {
       // Scroll verso il basso → nascondi
       this.isHidden = true;
@@ -131,4 +199,13 @@ export class NavbarComponent {
     this.lastScrollTop = currentScroll <= 0 ? 0 : currentScroll;
   }
 
+  // Chiude il collapse se risulta aperto
+  private closeNavbarIfOpen(): void {
+    if (!this.bsCollapse) return;
+    const el = this.navbarCollapse.nativeElement;
+    const isShown = el.classList.contains('show');
+    if (isShown) {
+      this.bsCollapse.hide();
+    }
+  }
 }
