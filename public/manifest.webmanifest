@@ -1,6 +1,6 @@
 {
   "name": "MyMoviesCollection",
-  "short_name": "MyMovies",
+  "short_name": "Movies",
   "display": "standalone",
   "scope": "./",
   "start_url": "./",
