@@ -1,6 +1,6 @@
 {
   "name": "my-movies-collection",
-  "short_name": "my-movies",
+  "short_name": "MyMovies",
   "display": "standalone",
   "scope": "./",
   "start_url": "./",
@@ -20,8 +20,8 @@
       "purpose": "maskable any"
     },
     {
-      "src": "icons/icon-128x128.png",
-      "sizes": "128x128",
+      "src": "icons/icon-120x120.png",
+      "sizes": "120x120",
       "type": "image/png",
       "purpose": "maskable any"
     },
@@ -45,13 +45,7 @@
     },
     {
       "src": "icons/icon-384x384.png",
-      "sizes": "384x384",
-      "type": "image/png",
-      "purpose": "maskable any"
-    },
-    {
-      "src": "icons/icon-512x512.png",
-      "sizes": "512x512",
+      "sizes": "310x310",
       "type": "image/png",
       "purpose": "maskable any"
     }
