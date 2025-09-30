@@ -76,8 +76,8 @@ export class InserimentoComponent implements OnInit {
 
     // Risultati ricerca film
     this.ricercaService.risultatiApi$.subscribe((risultati) => {
-      // Mostra solo film con poster_path presente
-      this.film = risultati.filter(f => f.poster_path);
+      // Mostra solo film e serie TV con poster_path presente
+      this.film = risultati.filter(f => (f.media_type === 'movie' || f.media_type === 'tv') && f.poster_path);
     });
     /*
     this.ricercaService.risultatiApi$.subscribe((risultati) => {
@@ -162,22 +162,36 @@ export class InserimentoComponent implements OnInit {
     setTimeout(() => this.messaggio = '', 3000);
   }
 
-  caricaDettagliFilm(film: any): void {
-    if (film.dettagliCaricati) return;
+  caricaDettagli(film: any): void {
+    if (film.dettagliCaricati || (film.media_type !== 'movie' && film.media_type !== 'tv')) {
+      return;
+    }
 
-    this.tmdbService.getDettagliFilm(film.id).subscribe(dettagli => {
+    this.tmdbService.getDettagli(film.id, film.media_type).subscribe(dettagli => {
       film.genre_names = dettagli?.genres?.map((g: any) => g.name) ?? [];
-    });
 
-    this.tmdbService.getCreditiFilm(film.id).subscribe(crediti => {
-      const crew = crediti?.crew ?? [];
-      const cast = crediti?.cast ?? [];
-      const regista = crew.find((m: any) => m?.job === 'Director');
-      const attoriPrincipali = cast.slice(0, 3);
+      this.tmdbService.getCrediti(film.id, film.media_type).subscribe(crediti => {
+        const crew = crediti?.crew ?? [];
+        const cast = crediti?.cast ?? [];
 
-      film.regista = regista ? regista.name : 'N/A';
-      film.attori = attoriPrincipali.map((a: any) => a?.name).filter(Boolean);
-      film.dettagliCaricati = true;
+        let directorOrCreator = 'N/A';
+        if (film.media_type === 'movie') {
+          const director = crew.find((m: any) => m.job === 'Director');
+          if (director) {
+            directorOrCreator = director.name;
+          }
+        } else if (film.media_type === 'tv') {
+          if (dettagli.created_by && dettagli.created_by.length > 0) {
+            directorOrCreator = dettagli.created_by[0].name;
+          }
+        }
+
+        const attoriPrincipali = cast.slice(0, 3);
+
+        film.regista = directorOrCreator;
+        film.attori = attoriPrincipali.map((a: any) => a.name).filter(Boolean);
+        film.dettagliCaricati = true;
+      });
     });
   }
 
@@ -274,13 +288,12 @@ export class InserimentoComponent implements OnInit {
   }
 
   private buildFilmCollezione(): Film {
+    const anno = this.filmSelezionato.release_date || this.filmSelezionato.first_air_date;
     return {
       id: `${this.filmSelezionato.id}_${this.formatoSelezionato}_${this.custodiaSelezionata}`,
       tmdbId: this.filmSelezionato.id,
-      titolo: this.filmSelezionato.title,
-      anno: this.filmSelezionato.release_date
-        ? new Date(this.filmSelezionato.release_date).getFullYear()
-        : 0,
+      titolo: this.filmSelezionato.title || this.filmSelezionato.name,
+      anno: anno ? new Date(anno).getFullYear() : 0,
       posterPath: this.filmSelezionato.poster_path,
       formato: this.formatoSelezionato as Film['formato'],
       custodia: this.custodiaSelezionata as Film['custodia'],
@@ -289,13 +302,12 @@ export class InserimentoComponent implements OnInit {
   }
 
   private buildFilmWishlist(): Film {
+    const anno = this.filmSelezionato.release_date || this.filmSelezionato.first_air_date;
     return {
       id: `${this.filmSelezionato.id}_${this.formatoSelezionato}_${this.custodiaSelezionata}`,
       tmdbId: this.filmSelezionato.id,
-      titolo: this.filmSelezionato.title,
-      anno: this.filmSelezionato.release_date
-        ? new Date(this.filmSelezionato.release_date).getFullYear()
-        : 0,
+      titolo: this.filmSelezionato.title || this.filmSelezionato.name,
+      anno: anno ? new Date(anno).getFullYear() : 0,
       posterPath: this.filmSelezionato.poster_path,
       formato: this.formatoSelezionato as Film['formato'],
       custodia: this.custodiaSelezionata as Film['custodia'],

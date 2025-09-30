@@ -36,15 +36,15 @@
       <div *ngFor="let f of film; let i = index" class="col-10 col-md-4 col-lg-3 d-flex mb-3">
         <div class="card h-100 shadow">
           <img *ngIf="f.poster_path" [src]="'https://image.tmdb.org/t/p/w500' + f.poster_path" class="card-img-top"
-            [alt]="f.title || 'Poster'" />
+            [alt]="(f.title || f.name) || 'Poster'" />
 
           <div class="card-body d-flex flex-column">
-            <h5 class="card-title mb-2">{{ f.title }}</h5>
+            <h5 class="card-title mb-2">{{ f.title || f.name }}</h5>
 
             <!-- TUTTO questo blocco resta in fondo alla card -->
             <div class="mt-auto">
               <p class="card-text mb-2">
-                <strong>Anno:</strong> {{ f.release_date | date:'yyyy' }}
+                <strong>Anno:</strong> {{ (f.release_date || f.first_air_date) | date:'yyyy' }}
               </p>
 
               <!-- Dettagli (overlay, non espande la card) -->
@@ -52,7 +52,7 @@
                 <div class="accordion-item border-0">
                   <h2 class="accordion-header">
                     <button class="accordion-button dettagli collapsed" type="button"
-                      (click)="toggleDettagli(f, $event); caricaDettagliFilm(f)"
+                      (click)="toggleDettagli(f, $event); caricaDettagli(f)"
                       [attr.aria-controls]="'overlay-' + f.id" [attr.aria-expanded]="false">
                       Dettagli
                     </button>
