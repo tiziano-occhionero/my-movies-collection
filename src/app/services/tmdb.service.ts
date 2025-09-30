@@ -9,18 +9,18 @@ export class TmdbService {
 
   constructor(private http: HttpClient) {}
 
-  cercaFilm(query: string): Observable<any> {
-    const url = `${this.baseUrl}/search/movie?api_key=${this.apiKey}&query=${encodeURIComponent(query)}&language=it-IT`;
+  cerca(query: string): Observable<any> {
+    const url = `${this.baseUrl}/search/multi?api_key=${this.apiKey}&query=${encodeURIComponent(query)}&language=it-IT`;
     return this.http.get<any>(url);
   }
 
-  getDettagliFilm(id: number): Observable<any> {
-    const url = `${this.baseUrl}/movie/${id}?api_key=${this.apiKey}&language=it-IT`;
+  getDettagli(id: number, tipo: 'movie' | 'tv'): Observable<any> {
+    const url = `${this.baseUrl}/${tipo}/${id}?api_key=${this.apiKey}&language=it-IT`;
     return this.http.get<any>(url);
   }
 
-  getCreditiFilm(id: number): Observable<any> {
-    const url = `${this.baseUrl}/movie/${id}/credits?api_key=${this.apiKey}&language=it-IT`;
+  getCrediti(id: number, tipo: 'movie' | 'tv'): Observable<any> {
+    const url = `${this.baseUrl}/${tipo}/${id}/credits?api_key=${this.apiKey}&language=it-IT`;
     return this.http.get<any>(url);
   }
 }
