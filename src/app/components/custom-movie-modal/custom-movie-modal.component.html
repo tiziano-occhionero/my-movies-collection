@@ -1,0 +1,53 @@
+<div class="modal fade" id="customMovieModal" tabindex="-1" aria-labelledby="customMovieModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="customMovieModalLabel">Inserimento Manuale Film</h5>
+        <button type="button" class="btn-close" (click)="close()" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <form>
+          <div class="mb-3">
+            <label for="titolo" class="form-label">Titolo</label>
+            <input type="text" class="form-control" id="titolo" [(ngModel)]="film.titolo" name="titolo" required>
+          </div>
+          <div class="mb-3">
+            <label for="anno" class="form-label">Anno</label>
+            <input type="number" class="form-control" id="anno" [(ngModel)]="film.anno" name="anno" required>
+          </div>
+          <div class="mb-3">
+            <label for="formato" class="form-label">Formato</label>
+            <select class="form-select" id="formato" [(ngModel)]="film.formato" name="formato">
+              <option value="dvd">DVD</option>
+              <option value="bd">Blu-ray</option>
+              <option value="uhdbd">4K Ultra HD</option>
+              <option value="vhs">VHS</option>
+              <option value="altro">Altro</option>
+            </select>
+          </div>
+          <div class="mb-3">
+            <label for="custodia" class="form-label">Custodia</label>
+            <select class="form-select" id="custodia" [(ngModel)]="film.custodia" name="custodia">
+              <option value="standard">Standard</option>
+              <option value="steelbook">Steelbook</option>
+              <option value="slipcase">Slipcase</option>
+              <option value="sJewelBox">Jewel Box</option>
+              <option value="cofanetto">Cofanetto</option>
+              <option value="snapper">Snapper</option>
+              <option value="altro">Altro</option>
+            </select>
+          </div>
+          <div class="mb-3">
+            <label for="posterUrl" class="form-label">URL Locandina</label>
+            <textarea class="form-control" id="posterUrl" [(ngModel)]="film.posterUrl" name="posterUrl" rows="3"></textarea>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" (click)="close()">Annulla</button>
+        <button type="button" class="btn btn-primary" (click)="saveToCollezione()">Aggiungi a Collezione</button>
+        <button type="button" class="btn btn-success" (click)="saveToWishlist()">Aggiungi a Lista Desideri</button>
+      </div>
+    </div>
+  </div>
+</div>

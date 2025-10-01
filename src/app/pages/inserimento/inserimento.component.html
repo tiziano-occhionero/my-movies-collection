@@ -169,5 +169,6 @@
     <app-login-modal #loginRef (loggedIn)="onLoggedIn($event)"></app-login-modal>
     <app-logout-modal #logoutRef [modalId]="'logoutModalInserimento'"
       (confermato)="confermaLogout()"></app-logout-modal>
+    <app-custom-movie-modal #customMovieRef (onFilmSave)="onCustomFilmSave($event)"></app-custom-movie-modal>
 
   </div>

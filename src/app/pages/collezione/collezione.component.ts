@@ -294,4 +294,14 @@ export class CollezioneComponent implements OnInit {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 
+  public getPosterUrl(film: Film): string | null {
+    if (film.posterUrl) {
+      return film.posterUrl;
+    }
+    if (film.posterPath) {
+      return 'https://image.tmdb.org/t/p/w300' + film.posterPath;
+    }
+    return null;
+  }
+
 }

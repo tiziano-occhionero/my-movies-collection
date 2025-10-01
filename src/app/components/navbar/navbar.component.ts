@@ -1,4 +1,4 @@
-import { Component, ViewChild, HostListener, ElementRef, AfterViewInit } from '@angular/core';
+import { Component, ViewChild, HostListener, ElementRef, AfterViewInit, Output, EventEmitter } from '@angular/core';
 import { Router, RouterModule, NavigationEnd } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
@@ -7,6 +7,7 @@ import { filter } from 'rxjs/operators';
 import { RicercaService } from '../../services/ricerca.service';
 import { TmdbService } from '../../services/tmdb.service';
 import { AuthService } from '../../services/auth.service';
+import { UiService } from '../../services/ui.service';
 
 import { LoginModalComponent } from '../login-modal/login-modal.component';
 import { LogoutModalComponent } from '../logout-modal/logout-modal.component';
@@ -43,7 +44,8 @@ export class NavbarComponent implements AfterViewInit {
     private router: Router,
     private ricercaService: RicercaService,
     private tmdbService: TmdbService,
-    public auth: AuthService
+    public auth: AuthService,
+    private uiService: UiService
   ) {
     this.router.events.pipe(filter(e => e instanceof NavigationEnd)).subscribe(() => {
       this.query = '';
@@ -193,6 +195,10 @@ export class NavbarComponent implements AfterViewInit {
   }
   apriLogout(): void { this.logoutModal?.open(); }
   confermaLogout(): void { this.auth.logout?.(); }
+
+  apriInserimentoManuale(): void {
+    this.uiService.triggerInserimentoManuale();
+  }
 
   isInserimentoPage(): boolean { return this.router.url.includes('inserimento'); }
   isCercaPage(): boolean { return this.router.url.includes('cerca'); }

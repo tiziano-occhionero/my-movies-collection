@@ -6,6 +6,7 @@ import Modal from 'bootstrap/js/dist/modal';
 import Collapse from 'bootstrap/js/dist/collapse';
 
 import { LoginModalComponent } from '../../components/login-modal/login-modal.component';
+import { CustomMovieModalComponent } from '../../components/custom-movie-modal/custom-movie-modal.component';
 import { RicercaService } from '../../services/ricerca.service';
 import { CollezioneService } from '../../services/collezione.service';
 import { TmdbService } from '../../services/tmdb.service';
@@ -16,17 +17,19 @@ import { Film } from '../../models/film.model';
 import { LogoutModalComponent } from '../../components/logout-modal/logout-modal.component';
 import { NetworkService } from '../../services/network.service';
 import { HealthService } from '../../services/health.service';
+import { UiService } from '../../services/ui.service';
 
 @Component({
   selector: 'app-inserimento',
   standalone: true,
-  imports: [CommonModule, FormsModule, LoginModalComponent, LogoutModalComponent],
+  imports: [CommonModule, FormsModule, LoginModalComponent, LogoutModalComponent, CustomMovieModalComponent],
   templateUrl: './inserimento.component.html',
   styleUrls: ['./inserimento.component.scss']
 })
 export class InserimentoComponent implements OnInit {
   @ViewChild('loginRef') loginModal!: LoginModalComponent;
   @ViewChild('logoutRef') logoutModal!: LogoutModalComponent;
+  @ViewChild('customMovieRef') customMovieModal!: CustomMovieModalComponent;
 
   film: any[] = [];
   ricercaEffettuata = false;
@@ -62,6 +65,7 @@ export class InserimentoComponent implements OnInit {
     public auth: AuthService,
     private networkService: NetworkService,
     private health: HealthService,
+    private uiService: UiService
   ) { }
 
   ngOnInit(): void {
@@ -87,6 +91,10 @@ export class InserimentoComponent implements OnInit {
     // Stato ricerca effettuata
     this.ricercaService.ricercaApiEffettuata$.subscribe((val) => {
       this.ricercaEffettuata = val;
+    });
+
+    this.uiService.inserimentoManuale$.subscribe(() => {
+      this.customMovieModal.open();
     });
   }
 
@@ -414,6 +422,22 @@ export class InserimentoComponent implements OnInit {
 
   scrollToTop() {
     window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  onCustomFilmSave(film: Film): void {
+    const service = film.provenienza === 'collezione'
+      ? this.collezioneService
+      : this.listaDesideriService;
+
+    service.aggiungiFilmCustom(film).subscribe({
+      next: () => {
+        this.confermaSuccesso = true;
+        setTimeout(() => this.confermaSuccesso = false, 2000);
+      },
+      error: (err) => {
+        console.error('Errore durante l\'aggiunta del film custom:', err);
+      }
+    });
   }
 
 }

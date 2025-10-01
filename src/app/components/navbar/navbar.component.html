@@ -27,6 +27,11 @@
 
       <!-- Gruppo destra: ricerca + utente -->
       <div class="d-md-flex ms-auto align-items-center gap-4 mt-2 mt-lg-0">
+        <!-- Inserimento Manuale -->
+        <button *ngIf="isInserimentoPage()" type="button" class="btn btn-outline-primary" (click)="apriInserimentoManuale()">
+          Inserimento Manuale
+        </button>
+
         <!-- Ricerca -->
         <form (ngSubmit)="onSubmit()" class="d-flex align-items-center gap-2 mb-0" role="search">
           <input class="form-control" type="search" placeholder="Cerca film" aria-label="Cerca" [(ngModel)]="query"

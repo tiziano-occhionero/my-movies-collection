@@ -45,6 +45,14 @@ export class ListaDesideriService {
     );
   }
 
+  /** POST crea in wishlist (film custom) */
+  aggiungiFilmCustom(film: Film): Observable<Film> {
+    const url = `${environment.apiBaseUrl}/films/custom`;
+    return this.http.post<Film>(url, film).pipe(
+      tap((saved) => this.appendLocal(saved ?? film))
+    );
+  }
+
   /** DELETE by id su /api/films/wishlist/{id} */
   rimuoviFilm(id: string): Promise<void> {
     const url = `${this.deleteBase}/${encodeURIComponent(id)}`;
