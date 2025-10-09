@@ -2,7 +2,7 @@ import { Component, Output, EventEmitter, AfterViewInit, OnDestroy } from '@angu
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { Film } from '../../models/film.model';
-import Modal from 'bootstrap/js/dist/modal';
+import { Modal } from 'bootstrap';
 
 @Component({
   selector: 'app-custom-movie-modal',
