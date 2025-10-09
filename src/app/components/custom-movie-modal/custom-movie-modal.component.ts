@@ -1,4 +1,4 @@
-import { Component, Output, EventEmitter } from '@angular/core';
+import { Component, Output, EventEmitter, AfterViewInit, OnDestroy } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { Film } from '../../models/film.model';
@@ -11,7 +11,7 @@ import Modal from 'bootstrap/js/dist/modal';
   templateUrl: './custom-movie-modal.component.html',
   styleUrls: ['./custom-movie-modal.component.scss']
 })
-export class CustomMovieModalComponent {
+export class CustomMovieModalComponent implements AfterViewInit, OnDestroy {
   @Output() onFilmSave = new EventEmitter<Film>();
 
   film: Partial<Film> = {
@@ -22,14 +22,26 @@ export class CustomMovieModalComponent {
     posterUrl: ''
   };
 
-  private modalInstance: any | null = null;
+  private modalInstance: Modal | null = null;
+  private modalElement: HTMLElement | null = null;
 
   constructor() { }
 
+  ngAfterViewInit(): void {
+    this.modalElement = document.getElementById('customMovieModal');
+    if (this.modalElement) {
+      this.modalInstance = new Modal(this.modalElement);
+    }
+  }
+
+  ngOnDestroy(): void {
+    if (this.modalInstance) {
+      this.modalInstance.dispose();
+    }
+  }
+
   open(): void {
-    const modalElement = document.getElementById('customMovieModal');
-    if (modalElement) {
-      this.modalInstance = new Modal(modalElement);
+    if (this.modalInstance) {
       this.modalInstance.show();
     }
   }
