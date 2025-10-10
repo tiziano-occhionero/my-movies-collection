@@ -52,14 +52,8 @@ export class CustomMovieModalComponent implements AfterViewInit, OnDestroy {
     }
   }
 
-  saveToCollezione(): void {
+  save(): void {
     this.film.provenienza = 'collezione';
-    this.onFilmSave.emit(this.film as Film);
-    this.close();
-  }
-
-  saveToWishlist(): void {
-    this.film.provenienza = 'lista-desideri';
     this.onFilmSave.emit(this.film as Film);
     this.close();
   }
