@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewChild, HostListener } from '@angular/core';
+import { Component, OnInit, ViewChild, HostListener, AfterViewInit, ElementRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { HttpErrorResponse } from '@angular/common/http';
 
@@ -10,6 +10,7 @@ import { AuthService } from '../../services/auth.service';
 import { Film } from '../../models/film.model';
 import { LoginModalComponent } from '../../components/login-modal/login-modal.component';
 import Modal from 'bootstrap/js/dist/modal';
+import Dropdown from 'bootstrap/js/dist/dropdown';
 import { LogoutModalComponent } from '../../components/logout-modal/logout-modal.component';
 import { HealthService } from '../../services/health.service';
 
@@ -20,7 +21,7 @@ import { HealthService } from '../../services/health.service';
   standalone: true,
   imports: [CommonModule, LoginModalComponent, LogoutModalComponent]
 })
-export class CollezioneComponent implements OnInit {
+export class CollezioneComponent implements OnInit, AfterViewInit {
   @ViewChild('loginRef') loginModal!: LoginModalComponent;
   @ViewChild('logoutRef') logoutModal!: LogoutModalComponent;
 
@@ -59,7 +60,8 @@ export class CollezioneComponent implements OnInit {
     private ricercaService: RicercaService,
     private networkService: NetworkService,
     public auth: AuthService,
-    private health: HealthService
+    private health: HealthService,
+    private elementRef: ElementRef
   ) { }
 
   ngOnInit(): void {
@@ -96,6 +98,14 @@ export class CollezioneComponent implements OnInit {
       this.queryCorrente = query;
       this.query = query.toLowerCase();
       this.applicaRicerca();
+    });
+  }
+
+  ngAfterViewInit(): void {
+    // Inizializza i dropdown di Bootstrap
+    const dropdownElementList = [].slice.call(this.elementRef.nativeElement.querySelectorAll('[data-bs-toggle="dropdown"]'));
+    dropdownElementList.map((dropdownToggleEl: any) => {
+      return new Dropdown(dropdownToggleEl);
     });
   }
 
