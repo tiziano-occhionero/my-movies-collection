@@ -3,6 +3,7 @@ import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { Film } from '../../models/film.model';
 import { Modal } from 'bootstrap';
+import { CollezioneService } from '../../services/collezione.service';
 
 @Component({
   selector: 'app-custom-movie-modal',
@@ -14,18 +15,14 @@ import { Modal } from 'bootstrap';
 export class CustomMovieModalComponent implements AfterViewInit, OnDestroy {
   @Output() onFilmSave = new EventEmitter<Film>();
 
-  film: Partial<Film> = {
-    titolo: '',
-    anno: undefined,
-    formato: 'dvd',
-    custodia: 'standard',
-    posterUrl: ''
-  };
+  film: Partial<Film> = {};
+  isSaving = false;
+  saveError = '';
 
   private modalInstance: Modal | null = null;
   private modalElement: HTMLElement | null = null;
 
-  constructor() { }
+  constructor(private collezioneService: CollezioneService) { }
 
   ngAfterViewInit(): void {
     this.modalElement = document.getElementById('customMovieModal');
@@ -40,7 +37,24 @@ export class CustomMovieModalComponent implements AfterViewInit, OnDestroy {
     }
   }
 
-  open(): void {
+  open(film?: Film): void {
+    this.isSaving = false;
+    this.saveError = '';
+
+    if (film) {
+      // Modalità modifica: clona l'oggetto per evitare side-effects
+      this.film = { ...film };
+    } else {
+      // Modalità inserimento: resetta il form
+      this.film = {
+        titolo: '',
+        anno: undefined,
+        formato: 'dvd',
+        custodia: 'standard',
+        posterUrl: ''
+      };
+    }
+
     if (this.modalInstance) {
       this.modalInstance.show();
     }
@@ -53,8 +67,26 @@ export class CustomMovieModalComponent implements AfterViewInit, OnDestroy {
   }
 
   save(): void {
-    this.film.provenienza = 'collezione';
-    this.onFilmSave.emit(this.film as Film);
-    this.close();
+    this.isSaving = true;
+    this.saveError = '';
+
+    const filmData = this.film as Film;
+
+    const saveObs = this.film.id
+      ? this.collezioneService.updateFilm(filmData) // MODIFICA
+      : this.collezioneService.aggiungiFilmCustom(filmData); // INSERIMENTO
+
+    saveObs.subscribe({
+      next: (savedFilm) => {
+        this.isSaving = false;
+        this.onFilmSave.emit(savedFilm);
+        this.close();
+      },
+      error: (err) => {
+        console.error('Salvataggio fallito', err);
+        this.isSaving = false;
+        this.saveError = `Salvataggio fallito: ${err.message || 'Errore sconosciuto'}`;
+      }
+    });
   }
 }

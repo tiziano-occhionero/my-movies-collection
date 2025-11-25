@@ -36,6 +36,8 @@ export class InserimentoComponent implements OnInit {
   filmSelezionato: any = null;
   formatoSelezionato: Film['formato'] | '' = '';
   custodiaSelezionata: Film['custodia'] | '' = '';
+  numeroDischiSelezionato: number | undefined;
+  noteSelezionate: string = '';
   filmGiaPresente = false;
   confermaSuccesso = false;
   messaggio: string = '';
@@ -256,6 +258,8 @@ export class InserimentoComponent implements OnInit {
     this.filmSelezionato = film;
     this.formatoSelezionato = '';
     this.custodiaSelezionata = '';
+    this.numeroDischiSelezionato = undefined;
+    this.noteSelezionate = '';
     this.confermaSuccesso = false;
     this.filmGiaPresente = false;
 
@@ -275,6 +279,8 @@ export class InserimentoComponent implements OnInit {
       this.confermaSuccesso = false;
       this.formatoSelezionato = '';
       this.custodiaSelezionata = '';
+      this.numeroDischiSelezionato = undefined;
+      this.noteSelezionate = '';
       this.filmSelezionato = null;
 
       const modalElement = document.getElementById('confermaAggiuntaModal');
@@ -305,7 +311,9 @@ export class InserimentoComponent implements OnInit {
       posterPath: this.filmSelezionato.poster_path,
       formato: this.formatoSelezionato as Film['formato'],
       custodia: this.custodiaSelezionata as Film['custodia'],
-      provenienza: 'collezione'
+      provenienza: 'collezione',
+      numeroDischi: this.numeroDischiSelezionato,
+      note: this.noteSelezionate
     };
   }
 
@@ -319,7 +327,9 @@ export class InserimentoComponent implements OnInit {
       posterPath: this.filmSelezionato.poster_path,
       formato: this.formatoSelezionato as Film['formato'],
       custodia: this.custodiaSelezionata as Film['custodia'],
-      provenienza: 'wishlist'
+      provenienza: 'wishlist',
+      numeroDischi: this.numeroDischiSelezionato,
+      note: this.noteSelezionate
     };
   }
 
@@ -429,13 +439,18 @@ export class InserimentoComponent implements OnInit {
       ? this.collezioneService
       : this.listaDesideriService;
 
-    service.aggiungiFilmCustom(film).subscribe({
+    // Check if it's an update or a new addition
+    const operation = film.id
+      ? service.aggiornaFilmCustom(film)
+      : service.aggiungiFilmCustom(film);
+
+    operation.subscribe({
       next: () => {
         this.confermaSuccesso = true;
         setTimeout(() => this.confermaSuccesso = false, 2000);
       },
       error: (err) => {
-        console.error('Errore durante l\'aggiunta del film custom:', err);
+        console.error('Errore durante il salvataggio del film custom:', err);
       }
     });
   }

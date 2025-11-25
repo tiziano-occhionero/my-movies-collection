@@ -12,4 +12,7 @@ export interface Film {
   regista?: string;
   attori?: string[];
   anno: number;
+  numeroDischi?: number;
+  note?: string;
+  dataInserimento?: string;
 }

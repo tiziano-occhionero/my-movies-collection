@@ -2,7 +2,7 @@
   <div class="modal-dialog">
     <div class="modal-content">
       <div class="modal-header">
-        <h5 class="modal-title" id="customMovieModalLabel">Inserimento Manuale Film</h5>
+        <h5 class="modal-title" id="customMovieModalLabel">{{ film.id ? 'Modifica Film' : 'Inserimento Manuale Film' }}</h5>
         <button type="button" class="btn-close" (click)="close()" aria-label="Close"></button>
       </div>
       <div class="modal-body">
@@ -38,14 +38,30 @@
             </select>
           </div>
           <div class="mb-3">
+            <label for="numeroDischi" class="form-label">Numero Dischi</label>
+            <input type="number" class="form-control" id="numeroDischi" [(ngModel)]="film.numeroDischi" name="numeroDischi">
+          </div>
+          <div class="mb-3">
+            <label for="note" class="form-label">Note</label>
+            <textarea class="form-control" id="note" [(ngModel)]="film.note" name="note" rows="3"></textarea>
+          </div>
+          <div class="mb-3">
             <label for="posterUrl" class="form-label">URL Locandina</label>
             <textarea class="form-control" id="posterUrl" [(ngModel)]="film.posterUrl" name="posterUrl" rows="3"></textarea>
           </div>
         </form>
+
+        <!-- Error Alert -->
+        <div *ngIf="saveError" class="alert alert-danger mt-3">
+          {{ saveError }}
+        </div>
       </div>
       <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" (click)="close()">Annulla</button>
-        <button type="button" class="btn btn-primary" (click)="save()">Aggiungi a Collezione</button>
+        <button type="button" class="btn btn-secondary" (click)="close()" [disabled]="isSaving">Annulla</button>
+        <button type="button" class="btn btn-primary" (click)="save()" [disabled]="isSaving">
+          <span *ngIf="isSaving" class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+          {{ isSaving ? 'Salvataggio...' : (film.id ? 'Salva Modifiche' : 'Aggiungi a Collezione') }}
+        </button>
       </div>
     </div>
   </div>

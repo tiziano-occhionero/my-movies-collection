@@ -45,6 +45,22 @@ export class CollezioneService {
     );
   }
 
+  /** PUT aggiorna film custom in collezione */
+  aggiornaFilmCustom(film: Film): Observable<Film> {
+    const url = `${environment.apiBaseUrl}/films/custom`;
+    return this.http.put<Film>(url, film).pipe(
+      tap((updated) => this.updateLocal(updated ?? film))
+    );
+  }
+
+  /** PUT aggiorna film in collezione */
+  updateFilm(film: Film): Observable<Film> {
+    const url = `${environment.apiBaseUrl}/films/${encodeURIComponent(film.id)}`;
+    return this.http.put<Film>(url, film).pipe(
+      tap((updated) => this.updateLocal(updated ?? film))
+    );
+  }
+
   /** DELETE by id su /api/films/collezione/{id} */
   rimuoviFilm(id: string): Promise<void> {
     const url = `${this.deleteBase}/${encodeURIComponent(id)}`;
@@ -81,5 +97,14 @@ export class CollezioneService {
   private removeLocal(id: string): void {
     const curr = this.getCollezione().filter(f => f.id !== id);
     this.saveLocal(curr);
+  }
+
+  private updateLocal(film: Film): void {
+    let curr = this.getCollezione();
+    const index = curr.findIndex(f => f.id === film.id);
+    if (index > -1) {
+      curr[index] = film;
+      this.saveLocal(curr);
+    }
   }
 }

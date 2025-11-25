@@ -12,6 +12,7 @@ import { LoginModalComponent } from '../../components/login-modal/login-modal.co
 import Modal from 'bootstrap/js/dist/modal';
 import Dropdown from 'bootstrap/js/dist/dropdown';
 import { LogoutModalComponent } from '../../components/logout-modal/logout-modal.component';
+import { CustomMovieModalComponent } from '../../components/custom-movie-modal/custom-movie-modal.component';
 import { HealthService } from '../../services/health.service';
 
 @Component({
@@ -19,11 +20,12 @@ import { HealthService } from '../../services/health.service';
   templateUrl: './collezione.component.html',
   styleUrls: ['./collezione.component.scss'],
   standalone: true,
-  imports: [CommonModule, LoginModalComponent, LogoutModalComponent]
+  imports: [CommonModule, LoginModalComponent, LogoutModalComponent, CustomMovieModalComponent]
 })
 export class CollezioneComponent implements OnInit, AfterViewInit {
   @ViewChild('loginRef') loginModal!: LoginModalComponent;
   @ViewChild('logoutRef') logoutModal!: LogoutModalComponent;
+  @ViewChild('customMovieRef') customMovieModal!: CustomMovieModalComponent;
 
   tuttiIFilm: Film[] = [];
   film: Film[] = [];
@@ -225,6 +227,21 @@ export class CollezioneComponent implements OnInit, AfterViewInit {
         this.film.sort((a, b) => b.anno - a.anno);
         break;
     }
+  }
+
+  // ---------- Modifica ----------
+  onClickModifica(film: Film): void {
+    if (!this.onlineEffettivo) {
+      this.openOfflineModal();
+      return;
+    }
+    this.customMovieModal.open(film);
+  }
+
+  onFilmSaved(): void {
+    this.messaggio = 'Film salvato con successo.';
+    this.caricaDaBackend();
+    setTimeout(() => this.messaggio = '', 3000);
   }
 
   // ---------- Rimozione ----------

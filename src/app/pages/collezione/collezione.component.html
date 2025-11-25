@@ -77,7 +77,11 @@
                 <p class="card-text">{{ f.anno }}</p>
                 <p><strong>Formato:</strong> {{ f.formato }}</p>
                 <p><strong>Custodia:</strong> {{ f.custodia }}</p>
+                <p *ngIf="f.numeroDischi"><strong>Dischi:</strong> {{ f.numeroDischi }}</p>
+                <p *ngIf="f.note"><strong>Note:</strong> {{ f.note }}</p>
+                <p *ngIf="f.dataInserimento" class="small text-muted">Aggiunto il: {{ f.dataInserimento | date:'dd/MM/yyyy' }}</p>
                 <div class="d-grid gap-2 mt-2">
+                  <button class="btn btn-primary" (click)="onClickModifica(f)">Modifica</button>
                   <button class="btn btn-danger" (click)="onClickRimuovi(f)">Rimuovi</button>
                 </div>
               </div>
@@ -91,8 +95,12 @@
           <li *ngFor="let f of film" class="list-group-item d-flex align-items-center justify-content-between">
             <span>
               {{ f.titolo }} ({{ f.anno }}) - {{ f.formato }} - {{ f.custodia }}
+              <small *ngIf="f.dataInserimento" class="text-muted d-block">Aggiunto: {{ f.dataInserimento | date:'dd/MM/yy' }}</small>
             </span>
-            <button class="btn btn-danger btn-sm" (click)="onClickRimuovi(f)">X</button>
+            <div class="btn-group">
+              <button class="btn btn-primary btn-sm" (click)="onClickModifica(f)">Modifica</button>
+              <button class="btn btn-danger btn-sm" (click)="onClickRimuovi(f)">X</button>
+            </div>
           </li>
         </ul>
       </div>
@@ -172,5 +180,6 @@
     <!-- Login Modal -->
     <app-login-modal #loginRef (loggedIn)="onLoggedIn($event)"></app-login-modal>
     <app-logout-modal #logoutRef [modalId]="'logoutModalCollezione'" (confermato)="confermaLogout()"></app-logout-modal>
+    <app-custom-movie-modal #customMovieRef (onFilmSave)="onFilmSaved()"></app-custom-movie-modal>
   </div>
 </div>

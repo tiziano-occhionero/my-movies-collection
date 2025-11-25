@@ -113,6 +113,16 @@
               </select>
             </div>
 
+            <div class="mb-3">
+              <label for="numeroDischi" class="form-label">Numero Dischi</label>
+              <input type="number" class="form-control" id="numeroDischi" [(ngModel)]="numeroDischiSelezionato" name="numeroDischi">
+            </div>
+
+            <div class="mb-3">
+              <label for="note" class="form-label">Note</label>
+              <textarea class="form-control" id="note" [(ngModel)]="noteSelezionate" name="note" rows="2"></textarea>
+            </div>
+
             <div *ngIf="confermaSuccesso" class="alert alert-success mt-3">
               Film aggiunto con successo!
             </div>

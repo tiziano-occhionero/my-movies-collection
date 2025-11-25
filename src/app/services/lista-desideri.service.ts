@@ -53,6 +53,14 @@ export class ListaDesideriService {
     );
   }
 
+  /** PUT aggiorna film custom in wishlist */
+  aggiornaFilmCustom(film: Film): Observable<Film> {
+    const url = `${environment.apiBaseUrl}/films/custom`;
+    return this.http.put<Film>(url, film).pipe(
+      tap((updated) => this.updateLocal(updated ?? film))
+    );
+  }
+
   /** DELETE by id su /api/films/wishlist/{id} */
   rimuoviFilm(id: string): Promise<void> {
     const url = `${this.deleteBase}/${encodeURIComponent(id)}`;
@@ -90,5 +98,14 @@ export class ListaDesideriService {
   private removeLocal(id: string): void {
     const curr = this.getLocal().filter(f => f.id !== id);
     this.saveLocal(curr);
+  }
+
+  private updateLocal(film: Film): void {
+    let curr = this.getLocal();
+    const index = curr.findIndex(f => f.id === film.id);
+    if (index > -1) {
+      curr[index] = film;
+      this.saveLocal(curr);
+    }
   }
 }
