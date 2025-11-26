@@ -13,6 +13,7 @@ import { LoginModalComponent } from '../../components/login-modal/login-modal.co
 import Modal from 'bootstrap/js/dist/modal';
 import Dropdown from 'bootstrap/js/dist/dropdown';
 import { LogoutModalComponent } from '../../components/logout-modal/logout-modal.component';
+import { CustomMovieModalComponent } from '../../components/custom-movie-modal/custom-movie-modal.component';
 import { HealthService } from '../../services/health.service';
 
 @Component({
@@ -20,11 +21,12 @@ import { HealthService } from '../../services/health.service';
   templateUrl: './lista-desideri.component.html',
   styleUrls: ['./lista-desideri.component.scss'],
   standalone: true,
-  imports: [CommonModule, LoginModalComponent, LogoutModalComponent]
+  imports: [CommonModule, LoginModalComponent, LogoutModalComponent, CustomMovieModalComponent]
 })
 export class ListaDesideriComponent implements OnInit, AfterViewInit {
   @ViewChild('loginRef') loginModal!: LoginModalComponent;
   @ViewChild('logoutRef') logoutModal!: LogoutModalComponent;
+  @ViewChild('customMovieRef') customMovieModal!: CustomMovieModalComponent;
 
   // Dati
   listaDesideri: Film[] = [];
@@ -81,24 +83,7 @@ export class ListaDesideriComponent implements OnInit, AfterViewInit {
     // Stato rete + primi dati
     this.networkService.isOnline().subscribe(isOnline => {
       this.isOnline = isOnline;
-
-      // Forza elenco se offline effettivo, ripristina ultima vista se online effettivo
-      if (!this.onlineEffettivo) {
-        this.vista = 'elenco';
-        this.caricaDaLocale();
-      } else {
-        this.vista = this.lastVistaOnline;
-        this.listaDesideriService.getTuttiIFilm().subscribe({
-          next: (dati) => {
-            this.listaDesideri = dati ?? [];
-            this.applicaFiltro();
-          },
-          error: (err) => {
-            console.error('Errore nel caricamento da backend:', err);
-            this.caricaDaLocale();
-          }
-        });
-      }
+      this.loadListaDesideri();
     });
 
     // 🔎 query da navbar
@@ -108,12 +93,47 @@ export class ListaDesideriComponent implements OnInit, AfterViewInit {
     });
   }
 
+  private loadListaDesideri(): void {
+    if (!this.onlineEffettivo) {
+      this.vista = 'elenco';
+      this.caricaDaLocale();
+      return;
+    }
+
+    this.vista = this.lastVistaOnline;
+    this.listaDesideriService.getTuttiIFilm().subscribe({
+      next: (dati) => {
+        this.listaDesideri = dati ?? [];
+        this.applicaFiltro();
+      },
+      error: (err) => {
+        console.error('Errore nel caricamento da backend:', err);
+        this.caricaDaLocale();
+      }
+    });
+  }
+
   ngAfterViewInit(): void {
     // Inizializza i dropdown di Bootstrap
     const dropdownElementList = [].slice.call(this.elementRef.nativeElement.querySelectorAll('[data-bs-toggle="dropdown"]'));
     dropdownElementList.map((dropdownToggleEl: any) => {
       return new Dropdown(dropdownToggleEl);
     });
+  }
+
+  // ---------- Modifica ----------
+  onClickModifica(film: Film): void {
+    if (!this.onlineEffettivo) {
+      this.openOfflineModal();
+      return;
+    }
+    this.customMovieModal.open(film);
+  }
+
+  onFilmSaved(): void {
+    this.azioneMsg = 'Film salvato con successo.';
+    this.loadListaDesideri();
+    setTimeout(() => this.azioneMsg = '', 3000);
   }
 
   // ---------- Helpers filtro + ordinamento ----------

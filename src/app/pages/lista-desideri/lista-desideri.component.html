@@ -80,6 +80,7 @@
                 <button type="button" class="btn btn-success" (click)="onClickAggiungiAllaCollezione(f)">
                   Aggiungi alla collezione
                 </button>
+                <button class="btn btn-primary" (click)="onClickModifica(f)">Modifica</button>
                 <button type="button" class="btn btn-danger text-nowrap" (click)="onClickElimina(f)">
                   Rimuovi
                 </button>
@@ -101,6 +102,7 @@
               <button type="button" class="btn btn-success btn-sm" (click)="onClickAggiungiAllaCollezione(f)">
                 Aggiungi
               </button>
+              <button class="btn btn-primary btn-sm" (click)="onClickModifica(f)">Modifica</button>
               <button type="button" class="btn btn-danger btn-sm" (click)="onClickElimina(f)">
                 X
               </button>
@@ -182,6 +184,7 @@
     <!-- Login / Logout modals -->
     <app-login-modal #loginRef (loggedIn)="onLoggedIn($event)"></app-login-modal>
     <app-logout-modal #logoutRef [modalId]="'logoutModalWishlist'" (confermato)="confermaLogout()"></app-logout-modal>
+    <app-custom-movie-modal #customMovieRef (onFilmSave)="onFilmSaved()"></app-custom-movie-modal>
 
     <!-- Modale: OPERAZIONE NON DISPONIBILE OFFLINE -->
     <div class="modal fade" id="offlineOperationModal" tabindex="-1" aria-labelledby="offlineOperationLabel"
