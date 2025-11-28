@@ -1,5 +1,5 @@
 export const environment = {
   production: true,
   serviceWorker: true,
-  apiBaseUrl: 'https://mymovies-backend-2f8g.onrender.com/api'
+  apiBaseUrl: 'https://mymovies-backend-production.up.railway.app/api'
 };
