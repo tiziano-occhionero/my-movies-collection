@@ -22,7 +22,14 @@ export class HealthService {
 
   /** Avvia il ping finché non risponde OK, poi si ferma */
   start(): void {
-    if (this.started) return;
+    // il ping serve solo in produzione, per "svegliare" il backend
+    if (this.started || !environment.production) {
+      if (!environment.production) {
+        // in locale, assumiamo sia sempre sveglio
+        this.awake$.next(true);
+      }
+      return;
+    }
     this.started = true;
 
     // prova subito una volta

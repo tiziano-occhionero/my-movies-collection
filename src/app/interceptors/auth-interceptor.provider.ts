@@ -10,8 +10,8 @@ const API_BASE = environment.apiBaseUrl.replace(/\/$/, '');
 export const authInterceptorFn: HttpInterceptorFn = (req, next) => {
   const method = req.method.toUpperCase();
 
-  // IMPORTANTISSIMO: niente Authorization su GET/HEAD/OPTIONS
-  if (method === 'GET' || method === 'HEAD' || method === 'OPTIONS') {
+  // IMPORTANTISSIMO: niente Authorization su OPTIONS
+  if (method === 'OPTIONS') {
     return next(req);
   }
 
