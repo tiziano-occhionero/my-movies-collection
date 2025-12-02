@@ -23,3 +23,8 @@ body {
 ::-webkit-scrollbar-thumb:hover {
   background: #bb2d3b; 
 }
+
+/* Regola globale per azzerare il margine dei paragrafi nelle card */
+.card .mt-auto p {
+  margin-bottom: 0.5rem !important; /* Valore ridotto per un po' di respiro */
+}

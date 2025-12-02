@@ -72,18 +72,22 @@
             <img *ngIf="f.posterPath" [src]="'https://image.tmdb.org/t/p/w300' + f.posterPath" class="card-img-top"
               [alt]="f.titolo" />
             <div class="card-body d-flex flex-column">
-              <h5 class="card-title mb-2">{{ f.titolo }} ({{ f.anno }})</h5>
-              <p class="mb-1"><strong>Formato:</strong> {{ f.formato }}</p>
-              <p class="mb-3"><strong>Custodia:</strong> {{ f.custodia }}</p>
-
-              <div class="d-grid gap-2 mt-auto">
-                <button type="button" class="btn btn-success" (click)="onClickAggiungiAllaCollezione(f)">
-                  Aggiungi alla collezione
-                </button>
-                <button class="btn btn-primary" (click)="onClickModifica(f)">Modifica</button>
-                <button type="button" class="btn btn-danger text-nowrap" (click)="onClickElimina(f)">
-                  Rimuovi
-                </button>
+              <h5 class="card-title">{{ f.titolo }}</h5>
+              <div class="mt-auto">
+                <p class="card-text"><strong>Anno:</strong> {{ f.anno }}</p>
+                <p><strong>Formato:</strong> {{ f.formato }}</p>
+                <p><strong>Custodia:</strong> {{ f.custodia }}</p>
+                <p *ngIf="f.note"><strong>Note:</strong> {{ f.note }}</p>
+                <p *ngIf="f.dataInserimento" class="small text-muted">Aggiunto il: {{ f.dataInserimento | date:'dd/MM/yyyy' }}</p>
+                <div class="d-grid gap-2 mt-auto">
+                  <button type="button" class="btn btn-success" (click)="onClickAggiungiAllaCollezione(f)">
+                    Aggiungi alla collezione
+                  </button>
+                  <button class="btn btn-primary" (click)="onClickModifica(f)">Modifica</button>
+                  <button type="button" class="btn btn-danger text-nowrap" (click)="onClickElimina(f)">
+                    Rimuovi
+                  </button>
+                </div>
               </div>
             </div>
           </div>

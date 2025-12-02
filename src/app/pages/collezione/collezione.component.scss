@@ -1,24 +1,29 @@
 .card {
   .card-img-top {
-    height: 450px; 
+    height: 450px;
     object-fit: cover;
     width: 100%;
+  }
+
+  .card-title {
+    position: relative;
+    display: -webkit-box;
+    -webkit-line-clamp: 2; /* Limita a 2 righe */
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    text-overflow: ellipsis; /* Mostra i puntini di sospensione */
   }
 }
 
 @media (max-width: 767.98px) {
-    .colSmart {
-        display: flex;
-        justify-content: center;
-    }
+  .colSmart {
+    display: flex;
+    justify-content: center;
+  }
 
-    .card {
-        h5 {
-           margin-bottom: 0px; 
-        }
-        .mt-auto p {
-            margin-bottom: 0px;
-        }
+  .card {
+    h5 {
+      margin-bottom: 0px;
     }
-
+  }
 }
