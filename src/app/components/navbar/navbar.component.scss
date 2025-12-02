@@ -10,24 +10,15 @@
   }
 }
 
-/* Spaziatura del bottone in mobile */
-@media (max-width: 1119.98px) {
+@media (max-width: 768px) {
+  .insManual {
+    margin-bottom: 1rem !important;
+  }
+
   .bottoneLoginOut {
-    margin-top: 0.5rem !important;
-  }
-
-  /* mt-2 */
-}
-
-/* Paracadute: forza visibile il contenuto collassabile in desktop */
-/*
-@media (min-width: 1120px) {
-  #navbarContent {
-    display: flex;
+    margin-top: 1rem !important;
   }
 }
-*/
-
 .navbar-brand {
   /*text-decoration: underline;*/
   /*font-family: serif;*/
