@@ -15,4 +15,8 @@ export interface Film {
   numeroDischi?: number;
   note?: string;
   dataInserimento?: string;
+
+  // Proprietà per dettagli caricati da TMDB
+  dettagliCaricati?: boolean;
+  genre_names?: string[];
 }

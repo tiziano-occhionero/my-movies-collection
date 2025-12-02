@@ -1,4 +1,10 @@
 .card {
+  .card-img-top {
+    height: 400px;
+    object-fit: cover;
+    width: 100%;
+  }
+
   .card-title {
     position: relative;
     display: -webkit-box;
@@ -6,6 +12,7 @@
     -webkit-box-orient: vertical;
     overflow: hidden;
     text-overflow: ellipsis; /* Mostra i puntini di sospensione */
+    margin-bottom: 0px !important;
   }
 }
 
@@ -13,5 +20,10 @@
   .colSmart {
     display: flex;
     justify-content: center;
+  }
+
+  .dettagli {
+    padding-top: 0;
+    padding-bottom: 0;
   }
 }

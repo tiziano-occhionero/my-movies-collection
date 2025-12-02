@@ -66,7 +66,7 @@
     <!-- ONLINE -->
     <ng-container *ngIf="isOnline; else offlineElenco">
       <!-- Vista: Galleria -->
-      <div *ngIf="vista === 'galleria'" class="row mt-3 colSmart">
+      <div *ngIf="vista === 'galleria'" class="row mt-3 colSmart" id="accordion-container">
         <div class="col-10 col-md-4 col-lg-3 mb-3" *ngFor="let f of listaDesideriFiltrata">
           <div class="card h-100 shadow">
             <img *ngIf="f.posterPath" [src]="'https://image.tmdb.org/t/p/w300' + f.posterPath" class="card-img-top"
@@ -75,11 +75,35 @@
               <h5 class="card-title">{{ f.titolo }}</h5>
               <div class="mt-auto">
                 <p class="card-text"><strong>Anno:</strong> {{ f.anno }}</p>
-                <p><strong>Formato:</strong> {{ f.formato }}</p>
-                <p><strong>Custodia:</strong> {{ f.custodia }}</p>
-                <p *ngIf="f.note"><strong>Note:</strong> {{ f.note }}</p>
                 <p *ngIf="f.dataInserimento" class="small text-muted">Aggiunto il: {{ f.dataInserimento | date:'dd/MM/yyyy' }}</p>
-                <div class="d-grid gap-2 mt-auto">
+
+                <!-- Dettagli (overlay, non espande la card) -->
+                <div class="accordion position-relative mb-2">
+                  <div class="accordion-item border-0">
+                    <h2 class="accordion-header">
+                      <button class="accordion-button dettagli collapsed" type="button"
+                        (click)="toggleDettagli(f, $event); caricaDettagli(f)"
+                        [attr.aria-controls]="'overlay-' + f.id" [attr.aria-expanded]="false">
+                        Dettagli
+                      </button>
+                    </h2>
+                    <!-- Overlay assoluto -->
+                    <div [id]="'overlay-' + f.id"
+                      class="accordion-collapse collapse position-absolute start-0 top-100 mt-1 w-100"
+                      data-bs-parent="#accordion-container" style="z-index:1050;">
+                      <div class="accordion-body bg-white border rounded shadow p-3">
+                        <p class="mb-1"><strong>Custodia:</strong> {{ f.custodia }}</p>
+                        <p *ngIf="f.numeroDischi" class="mb-1"><strong>Dischi:</strong> {{ f.numeroDischi }}</p>
+                        <p *ngIf="f.note" class="mb-1"><strong>Note:</strong> {{ f.note }}</p>
+                        <p class="mb-1"><strong>Genere:</strong> {{ f.genre_names?.join(', ') || 'N/A' }}</p>
+                        <p class="mb-1"><strong>Regista:</strong> {{ f.regista || 'N/A' }}</p>
+                        <p class="mb-0"><strong>Attori principali:</strong> {{ f.attori?.join(', ') || 'N/A' }}</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="d-grid gap-2 mt-2">
                   <button type="button" class="btn btn-success" (click)="onClickAggiungiAllaCollezione(f)">
                     Aggiungi alla collezione
                   </button>

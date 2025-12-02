@@ -26,5 +26,10 @@ body {
 
 /* Regola globale per azzerare il margine dei paragrafi nelle card */
 .card .mt-auto p {
-  margin-bottom: 0.5rem !important; /* Valore ridotto per un po' di respiro */
+  margin-bottom: 0 !important; /* Valore ridotto per un po' di respiro */
+}
+
+/* "Altezza" bottone apertura dettagli */
+.accordion-button {
+  padding: 8px 20px;
 }

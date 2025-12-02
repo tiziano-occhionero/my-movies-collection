@@ -11,7 +11,7 @@
 }
 
 /* Spaziatura del bottone in mobile */
-@media (max-width: 991.98px) {
+@media (max-width: 1119.98px) {
   .bottoneLoginOut {
     margin-top: 0.5rem !important;
   }
@@ -20,11 +20,13 @@
 }
 
 /* Paracadute: forza visibile il contenuto collassabile in desktop */
-@media (min-width: 992px) {
+/*
+@media (min-width: 1120px) {
   #navbarContent {
-    display: flex !important;
+    display: flex;
   }
 }
+*/
 
 .navbar-brand {
   /*text-decoration: underline;*/
